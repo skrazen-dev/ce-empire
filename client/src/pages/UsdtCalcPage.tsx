@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { DollarSign, Copy, RotateCcw, TrendingUp, TrendingDown, Calculator, Trash2, Clock } from 'lucide-react';
+import { DollarSign, Copy, RotateCcw, TrendingUp, TrendingDown, Calculator, Trash2, Clock, Download } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { useStore } from '@/lib/store';
 import { playSound, playNotificationSound } from '@/lib/sound';
 import { formatNumber, formatSmart } from '@/lib/format';
+import { exportToCSV, exportToJSON, generateFilename, generateSummary } from '@/lib/export';
 
 export default function UsdtCalcPage() {
   const { usdtCalcs, addUsdtCalc, deleteUsdtCalc, clearUsdtCalcs, settings } = useStore();
@@ -243,6 +244,30 @@ export default function UsdtCalcPage() {
           <RotateCcw size={14} />
         </Button>
       </div>
+
+      {/* Export Buttons */}
+      {usdtCalcs.length > 0 && (
+        <div className="flex gap-2">
+          <Button
+            onClick={() => {
+              exportToCSV(usdtCalcs, generateFilename('csv'));
+              toast.success('ส่งออก CSV สำเร็จ');
+            }}
+            className="flex-1 bg-[#10B981]/20 border border-[#10B981]/30 hover:bg-[#10B981]/30 text-[#10B981] text-xs h-9 transition-colors"
+          >
+            <Download size={13} className="mr-1" /> CSV
+          </Button>
+          <Button
+            onClick={() => {
+              exportToJSON(usdtCalcs, generateFilename('json'));
+              toast.success('ส่งออก JSON สำเร็จ');
+            }}
+            className="flex-1 bg-[#3B82F6]/20 border border-[#3B82F6]/30 hover:bg-[#3B82F6]/30 text-[#3B82F6] text-xs h-9 transition-colors"
+          >
+            <Download size={13} className="mr-1" /> JSON
+          </Button>
+        </div>
+      )}
 
       {/* History Toggle */}
       <Button
