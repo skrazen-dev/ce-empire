@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { BankAccount, Expense, Agent, PageId } from './types';
+import type { BankAccount, Expense, Agent, PageId, UsdtCalc, AppSettings } from './types';
 
 function uid(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -25,6 +25,16 @@ interface AppState {
   agents: Agent[];
   addAgent: (name: string) => void;
   deleteAgent: (id: string) => void;
+
+  // USDT Calc History
+  usdtCalcs: UsdtCalc[];
+  addUsdtCalc: (calc: Omit<UsdtCalc, 'id' | 'createdAt'>) => void;
+  deleteUsdtCalc: (id: string) => void;
+  clearUsdtCalcs: () => void;
+
+  // Settings
+  settings: AppSettings;
+  updateSettings: (settings: Partial<AppSettings>) => void;
 }
 
 export const useStore = create<AppState>()(
@@ -66,6 +76,29 @@ export const useStore = create<AppState>()(
         })),
       deleteAgent: (id) =>
         set((state) => ({ agents: state.agents.filter((a) => a.id !== id) })),
+
+      // USDT Calc
+      usdtCalcs: [],
+      addUsdtCalc: (calc) =>
+        set((state) => ({
+          usdtCalcs: [{ ...calc, id: uid(), createdAt: new Date().toISOString() }, ...state.usdtCalcs].slice(0, 100), // Keep last 100
+        })),
+      deleteUsdtCalc: (id) =>
+        set((state) => ({ usdtCalcs: state.usdtCalcs.filter((c) => c.id !== id) })),
+      clearUsdtCalcs: () => set({ usdtCalcs: [] }),
+
+      // Settings
+      settings: {
+        soundEnabled: true,
+        telegramBotToken: '',
+        telegramChatId: '',
+        notificationThreshold: 5,
+        theme: 'dark',
+      },
+      updateSettings: (newSettings) =>
+        set((state) => ({
+          settings: { ...state.settings, ...newSettings },
+        })),
     }),
     {
       name: 'ce-empire-data',
@@ -73,6 +106,8 @@ export const useStore = create<AppState>()(
         accounts: state.accounts,
         expenses: state.expenses,
         agents: state.agents,
+        usdtCalcs: state.usdtCalcs,
+        settings: state.settings,
       }),
     }
   )

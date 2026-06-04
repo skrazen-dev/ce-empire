@@ -43,4 +43,24 @@ export interface Agent {
   createdAt: string;
 }
 
-export type PageId = 'dashboard' | 'accounts' | 'expenses' | 'agents' | 'status' | 'proof' | 'usdt-calc';
+export interface UsdtCalc {
+  id: string;
+  thb: number;
+  usd: number;
+  sellRate: number;
+  costPerUsd: number;
+  sellTotal: number;
+  profit: number;
+  profitPercent: number;
+  createdAt: string;
+}
+
+export interface AppSettings {
+  soundEnabled: boolean;
+  telegramBotToken: string;
+  telegramChatId: string;
+  notificationThreshold: number; // % profit threshold to notify
+  theme: 'dark' | 'light';
+}
+
+export type PageId = 'dashboard' | 'accounts' | 'expenses' | 'agents' | 'status' | 'proof' | 'usdt-calc' | 'settings';
