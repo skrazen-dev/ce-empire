@@ -15,6 +15,7 @@ import ProofPage from "@/pages/ProofPage";
 import UsdtCalcPage from "@/pages/UsdtCalcPage";
 import SettingsPage from "@/pages/SettingsPage";
 import BulkCalcPage from "@/pages/BulkCalcPage";
+import RiskAnalysisPage from "@/pages/RiskAnalysisPage";
 
 function PageRenderer() {
   const { currentPage } = useStore();
@@ -27,12 +28,13 @@ function PageRenderer() {
     case 'proof': return <ProofPage />;
     case 'usdt-calc': return <UsdtCalcPage />;
     case 'bulk-calc': return <BulkCalcPage />;
+    case 'risk-analysis': return <RiskAnalysisPage />;
     case 'settings': return <SettingsPage />;
     default: return <DashboardPage />;
   }
 }
-
 function AppLayout() {
+  // make sure to consider if you need authentication for certain routes
   return (
     <div className="min-h-screen bg-[#0F1419]">
       <TopBar />

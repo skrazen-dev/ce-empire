@@ -1,4 +1,4 @@
-import { LayoutDashboard, CreditCard, Receipt, Users, CheckCircle2, Image, Sparkles, DollarSign, Settings, Calculator } from 'lucide-react';
+import { LayoutDashboard, CreditCard, Receipt, Users, CheckCircle2, Image, Sparkles, DollarSign, Settings, Calculator, ShieldAlert } from 'lucide-react';
 import { useStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
 import type { PageId } from '@/lib/types';
@@ -12,6 +12,7 @@ const NAV_ITEMS: { id: PageId; label: string; icon: typeof LayoutDashboard }[] =
   { id: 'proof', label: 'หลักฐาน', icon: Image },
   { id: 'usdt-calc', label: 'คำนวณ USDT', icon: DollarSign },
   { id: 'bulk-calc', label: 'Bulk คำนวณ', icon: Calculator },
+  { id: 'risk-analysis', label: 'ความเสี่ยง', icon: ShieldAlert },
   { id: 'settings', label: 'ตั้งค่า', icon: Settings },
 ];
 

@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Upload, Download, Copy, Trash2, Plus, TrendingUp, TrendingDown, AlertCircle } from 'lucide-react';
+import { Upload, Download, Copy, Trash2, Plus, TrendingUp, TrendingDown, AlertCircle, Send } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import { useStore } from '@/lib/store';
 import { playSound } from '@/lib/sound';
 import { formatNumber, formatSmart } from '@/lib/format';
 import { exportToCSV, generateFilename } from '@/lib/export';
+import { formatBulkSummaryForTelegram, sendTelegramMessage } from '@/lib/telegram';
 import type { UsdtCalc } from '@/lib/types';
 
 interface BulkItem {
@@ -32,6 +33,15 @@ export default function BulkCalcPage() {
   const [csvInput, setCsvInput] = useState('');
   const [results, setResults] = useState<BulkItem[]>([]);
   const [showTemplate, setShowTemplate] = useState(false);
+  const [isSendingTelegram, setIsSendingTelegram] = useState(false);
+  const [telegramSent, setTelegramSent] = useState(false);
+
+  const totalProfit = results.reduce((sum, r) => sum + r.profit, 0);
+  const totalInvested = results.reduce((sum, r) => sum + r.thb, 0);
+  const totalRevenue = results.reduce((sum, r) => sum + r.sellTotal, 0);
+  const avgProfitPercent = results.length > 0 ? results.reduce((sum, r) => sum + r.profitPercent, 0) / results.length : 0;
+  const winCount = results.filter(r => r.profit > 0).length;
+  const winRate = results.length > 0 ? (winCount / results.length) * 100 : 0;
 
   const calculateBulk = useCallback(() => {
     const lines = csvInput.trim().split('\n');
@@ -126,13 +136,43 @@ export default function BulkCalcPage() {
     exportToCSV(bulkCalcs, generateFilename('csv'));
     toast.success('ส่งออก CSV สำเร็จ');
   }, [results]);
+  const handleSendTelegram = useCallback(async () => {
+    if (results.length === 0) {
+      toast.error("ไม่มีผลลัพธ์ที่จะส่ง");
+      return;
+    }
+    if (!settings.telegramBotToken || !settings.telegramChatId) {
+      toast.error("กรุณาตั้งค่า Telegram Bot Token และ Chat ID ก่อน");
+      return;
+    }
+    setIsSendingTelegram(true);
+    const summary = {
+      totalItems: results.length,
+      totalInvested,
+      totalRevenue,
+      totalProfit,
+      profitRate: totalInvested > 0 ? (totalProfit / totalInvested) * 100 : 0,
+      winRate,
+      avgProfitPercent,
+    };
+    const message = formatBulkSummaryForTelegram(summary);
+    const result = await sendTelegramMessage(
+      settings.telegramBotToken,
+      settings.telegramChatId,
+      message
+    );
+    setIsSendingTelegram(false);
+    if (result.success) {
+      setTelegramSent(true);
+      toast.success("ส่งไป Telegram สำเร็จ");
+      if (settings.soundEnabled) playSound("success");
+      setTimeout(() => setTelegramSent(false), 3000);
+    } else {
+      toast.error(result.error || "ไม่สามารถส่งไป Telegram");
+      if (settings.soundEnabled) playSound("error");
+    }
+  }, [results, totalProfit, totalInvested, totalRevenue, winRate, avgProfitPercent, settings]);
 
-  const totalProfit = results.reduce((sum, r) => sum + r.profit, 0);
-  const totalInvested = results.reduce((sum, r) => sum + r.thb, 0);
-  const totalRevenue = results.reduce((sum, r) => sum + r.sellTotal, 0);
-  const avgProfitPercent = results.length > 0 ? results.reduce((sum, r) => sum + r.profitPercent, 0) / results.length : 0;
-  const winCount = results.filter(r => r.profit > 0).length;
-  const winRate = results.length > 0 ? (winCount / results.length) * 100 : 0;
 
   return (
     <div className="space-y-4 pb-24 md:pb-4">
@@ -265,6 +305,17 @@ export default function BulkCalcPage() {
                   <Download size={11} className="mr-1" /> CSV
                 </Button>
               </div>
+                <Button
+                  onClick={handleSendTelegram}
+                  disabled={isSendingTelegram || telegramSent}
+                  className={`text-xs h-7 px-2 transition-colors ${
+                    telegramSent
+                      ? "bg-[#10B981]/20 border border-[#10B981]/30 text-[#10B981]"
+                      : "bg-[#3B82F6]/20 border border-[#3B82F6]/30 hover:bg-[#3B82F6]/30 text-[#3B82F6] disabled:opacity-50"
+                  }`}
+                >
+                  <Send size={11} className="mr-1" /> {isSendingTelegram ? "กำลังส่ง..." : telegramSent ? "ส่งแล้ว" : "Telegram"}
+                </Button>
             </div>
 
             {/* Table */}
@@ -324,4 +375,5 @@ export default function BulkCalcPage() {
       )}
     </div>
   );
+
 }
