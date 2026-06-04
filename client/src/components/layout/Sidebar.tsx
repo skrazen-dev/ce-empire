@@ -28,12 +28,12 @@ export function Sidebar() {
               className={cn(
                 'flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-left w-full',
                 active
-                  ? 'bg-accent text-accent-foreground border border-border shadow-sm'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-accent/50 border border-transparent'
+                  ? 'bg-[#1E2730] text-white border border-[#00D4FF]/20 shadow-[0_0_10px_rgba(0,212,255,0.08)]'
+                  : 'text-[#A0A0A0] hover:text-white hover:bg-[#1E2730]/50 border border-transparent'
               )}
               aria-current={active ? 'page' : undefined}
             >
-              <Icon size={18} className={active ? 'text-primary' : ''} />
+              <Icon size={18} className={active ? 'text-[#00D4FF]' : ''} />
               <span>{item.label}</span>
             </button>
           );
@@ -41,10 +41,10 @@ export function Sidebar() {
       </nav>
 
       <div className="mt-auto pt-4">
-        <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-purple-500/10 to-cyan-500/10 border border-purple-500/20">
-          <Sparkles size={16} className="text-purple-400" />
-          <span className="text-xs font-medium text-purple-300">Grok AI</span>
-        </div>
+        <button className="w-full flex items-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-[#00D4FF]/10 to-[#0099CC]/10 border border-[#00D4FF]/20 hover:border-[#00D4FF]/40 transition-all group">
+          <Sparkles size={16} className="text-[#00D4FF]" />
+          <span className="text-xs font-semibold text-[#00D4FF]">Grok AI</span>
+        </button>
       </div>
     </aside>
   );
