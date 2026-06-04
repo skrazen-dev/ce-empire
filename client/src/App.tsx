@@ -1,38 +1,51 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import NotFound from "@/pages/NotFound";
-import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import Home from "./pages/Home";
+import { useStore } from "@/lib/store";
+import { TopBar } from "@/components/layout/TopBar";
+import { Sidebar } from "@/components/layout/Sidebar";
+import DashboardPage from "@/pages/DashboardPage";
+import AccountsPage from "@/pages/AccountsPage";
+import ExpensesPage from "@/pages/ExpensesPage";
+import AgentsPage from "@/pages/AgentsPage";
+import StatusPage from "@/pages/StatusPage";
+import ProofPage from "@/pages/ProofPage";
 
-
-function Router() {
-  return (
-    <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
-      <Route component={NotFound} />
-    </Switch>
-  );
+function PageRenderer() {
+  const { currentPage } = useStore();
+  switch (currentPage) {
+    case 'dashboard': return <DashboardPage />;
+    case 'accounts': return <AccountsPage />;
+    case 'expenses': return <ExpensesPage />;
+    case 'agents': return <AgentsPage />;
+    case 'status': return <StatusPage />;
+    case 'proof': return <ProofPage />;
+    default: return <DashboardPage />;
+  }
 }
 
-// NOTE: About Theme
-// - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
-//   to keep consistent foreground/background color across components
-// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
+function AppLayout() {
+  return (
+    <div className="min-h-screen bg-background">
+      <TopBar />
+      <div className="flex max-w-[1440px] mx-auto px-3 sm:px-4 lg:px-6">
+        <Sidebar />
+        <main className="flex-1 py-5 lg:pl-4 min-w-0">
+          <PageRenderer />
+        </main>
+      </div>
+    </div>
+  );
+}
 
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-        // switchable
-      >
+      <ThemeProvider defaultTheme="dark">
         <TooltipProvider>
           <Toaster />
-          <Router />
+          <AppLayout />
         </TooltipProvider>
       </ThemeProvider>
     </ErrorBoundary>
