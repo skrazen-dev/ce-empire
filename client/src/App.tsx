@@ -14,6 +14,7 @@ import StatusPage from "@/pages/StatusPage";
 import ProofPage from "@/pages/ProofPage";
 import UsdtCalcPage from "@/pages/UsdtCalcPage";
 import SettingsPage from "@/pages/SettingsPage";
+import BulkCalcPage from "@/pages/BulkCalcPage";
 
 function PageRenderer() {
   const { currentPage } = useStore();
@@ -25,6 +26,7 @@ function PageRenderer() {
     case 'status': return <StatusPage />;
     case 'proof': return <ProofPage />;
     case 'usdt-calc': return <UsdtCalcPage />;
+    case 'bulk-calc': return <BulkCalcPage />;
     case 'settings': return <SettingsPage />;
     default: return <DashboardPage />;
   }

@@ -63,4 +63,4 @@ export interface AppSettings {
   theme: 'dark' | 'light';
 }
 
-export type PageId = 'dashboard' | 'accounts' | 'expenses' | 'agents' | 'status' | 'proof' | 'usdt-calc' | 'settings';
+export type PageId = 'dashboard' | 'accounts' | 'expenses' | 'agents' | 'status' | 'proof' | 'usdt-calc' | 'bulk-calc' | 'settings';
