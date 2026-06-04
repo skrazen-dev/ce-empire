@@ -1,4 +1,4 @@
-import { LayoutDashboard, CreditCard, Receipt, Users, CheckCircle2, Image } from 'lucide-react';
+import { LayoutDashboard, CreditCard, Receipt, Users, CheckCircle2, Image, DollarSign } from 'lucide-react';
 import { useStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
 import type { PageId } from '@/lib/types';
@@ -10,6 +10,7 @@ const NAV_ITEMS: { id: PageId; label: string; icon: typeof LayoutDashboard }[] =
   { id: 'agents', label: 'Agent', icon: Users },
   { id: 'status', label: 'สถานะ', icon: CheckCircle2 },
   { id: 'proof', label: 'หลักฐาน', icon: Image },
+  { id: 'usdt-calc', label: 'USDT', icon: DollarSign },
 ];
 
 export function BottomNav() {

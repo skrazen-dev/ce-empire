@@ -43,4 +43,4 @@ export interface Agent {
   createdAt: string;
 }
 
-export type PageId = 'dashboard' | 'accounts' | 'expenses' | 'agents' | 'status' | 'proof';
+export type PageId = 'dashboard' | 'accounts' | 'expenses' | 'agents' | 'status' | 'proof' | 'usdt-calc';

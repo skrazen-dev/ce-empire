@@ -12,6 +12,7 @@ import ExpensesPage from "@/pages/ExpensesPage";
 import AgentsPage from "@/pages/AgentsPage";
 import StatusPage from "@/pages/StatusPage";
 import ProofPage from "@/pages/ProofPage";
+import UsdtCalcPage from "@/pages/UsdtCalcPage";
 
 function PageRenderer() {
   const { currentPage } = useStore();
@@ -22,6 +23,7 @@ function PageRenderer() {
     case 'agents': return <AgentsPage />;
     case 'status': return <StatusPage />;
     case 'proof': return <ProofPage />;
+    case 'usdt-calc': return <UsdtCalcPage />;
     default: return <DashboardPage />;
   }
 }
