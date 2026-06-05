@@ -15,6 +15,13 @@
       "when": 1780593301677,
       "tag": "0001_chunky_marvel_apes",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1780594777178,
+      "tag": "0002_peaceful_wolverine",
+      "breakpoints": true
     }
   ]
 }

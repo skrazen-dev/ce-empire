@@ -4,6 +4,8 @@ import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
 import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { riskRouter } from "./routers/risk";
+import { pinnedRouter } from "./routers/pinned";
+import { grokRouter } from "./routers/grok";
 import {
   clearUsdtCalculations,
   createAccount,
@@ -228,6 +230,8 @@ export const appRouter = router({
   usdtCalcs: usdtCalcsRouter,
   settings: settingsRouter,
   risk: riskRouter,
+  pinned: pinnedRouter,
+  grok: grokRouter,
 });
 
 export type AppRouter = typeof appRouter;

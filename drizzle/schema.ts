@@ -158,3 +158,20 @@ export const riskAlerts = mysqlTable("risk_alerts", {
 
 export type RiskAlert = typeof riskAlerts.$inferSelect;
 export type InsertRiskAlert = typeof riskAlerts.$inferInsert;
+
+// ─── Pinned Accounts (บัญชีปักหมุดในกลุ่ม) ─────────────────────────────────────
+export const pinnedAccounts = mysqlTable("pinned_accounts", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  accountId: int("accountId").notNull(),
+  telegramGroup: varchar("telegramGroup", { length: 200 }).notNull(),
+  displayOrder: int("displayOrder").default(0).notNull(),
+  receivedAmount: decimal("receivedAmount", { precision: 15, scale: 2 }).default("0.00").notNull(),
+  note: text("note"),
+  isActive: mysqlEnum("isActive", ["yes", "no"]).default("yes").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type PinnedAccount = typeof pinnedAccounts.$inferSelect;
+export type InsertPinnedAccount = typeof pinnedAccounts.$inferInsert;

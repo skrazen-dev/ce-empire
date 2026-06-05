@@ -20,6 +20,7 @@ import {
   XCircle,
 } from 'lucide-react';
 import { formatNumber } from '@/lib/format';
+import GrokChatPanel from '@/components/GrokChatPanel';
 
 type RiskLevel = 'low' | 'medium' | 'high' | 'critical';
 
@@ -477,8 +478,11 @@ export default function RiskAnalysisPage() {
         </div>
       )}
 
-      {/* Risk Cards */}
-      {riskQuery.isLoading ? (
+      {/* Grok AI Assistant */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2">
+          {/* Risk Cards */}
+          {riskQuery.isLoading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-40 bg-[#1A2332] rounded-2xl animate-pulse border border-[#2A3441]" />
@@ -512,6 +516,11 @@ export default function RiskAnalysisPage() {
             )}
         </div>
       )}
+        </div>
+        <div className="lg:col-span-1">
+          <GrokChatPanel accountData={results.length > 0 ? results[0] : undefined} />
+        </div>
+      </div>
 
       {/* Add Order Modal */}
       {addOrderModal && (
