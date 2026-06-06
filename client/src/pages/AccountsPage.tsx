@@ -108,11 +108,23 @@ function AccountFormDialog({ open, onClose }: { open: boolean; onClose: () => vo
   const [pin, setPin] = useState('');
   const [paid, setPaid] = useState('0');
   const [due, setDue] = useState('0');
+  const [profilePhoto, setProfilePhoto] = useState<File | null>(null);
+  const [idCardNumber, setIdCardNumber] = useState('');
+  const [idCardPhoto, setIdCardPhoto] = useState<File | null>(null);
+  const [dateOfBirth, setDateOfBirth] = useState('');
+  const [virtualCardNumber, setVirtualCardNumber] = useState('');
+  const [cardCVV, setCardCVV] = useState('');
+  const [cardExpiryDate, setCardExpiryDate] = useState('');
+  const [accountEmail, setAccountEmail] = useState('');
+  const [accountPassword, setAccountPassword] = useState('');
 
   const reset = () => {
     setSelectedBank(''); setAccountNo(''); setPhone('');
     setFirstName(''); setLastName(''); setPin('');
     setPaid('0'); setDue('0');
+    setProfilePhoto(null); setIdCardNumber(''); setIdCardPhoto(null);
+    setDateOfBirth(''); setVirtualCardNumber(''); setCardCVV('');
+    setCardExpiryDate(''); setAccountEmail(''); setAccountPassword('');
   };
 
   const handleSubmit = () => {
@@ -133,12 +145,13 @@ function AccountFormDialog({ open, onClose }: { open: boolean; onClose: () => vo
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
-      <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto bg-[#1A1F26] border-[rgba(255,255,255,0.08)]">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-[#1A1F26] border-[rgba(255,255,255,0.08)]">
         <DialogHeader>
           <DialogTitle className="text-white">เพิ่มบัญชี</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
+          {/* Bank Selection */}
           <div>
             <Label className="text-xs text-[#A0A0A0] mb-2 block">เลือกธนาคาร</Label>
             <div className="grid grid-cols-4 sm:grid-cols-5 gap-2 max-h-[200px] overflow-y-auto">
@@ -161,6 +174,7 @@ function AccountFormDialog({ open, onClose }: { open: boolean; onClose: () => vo
             </div>
           </div>
 
+          {/* Basic Info */}
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label htmlFor="accountNo" className="text-[#A0A0A0]">เลขบัญชี</Label>
@@ -198,7 +212,72 @@ function AccountFormDialog({ open, onClose }: { open: boolean; onClose: () => vo
             </div>
           </div>
 
-          <div className="flex justify-end gap-2 pt-2">
+          {/* Profile & Identity */}
+          <div className="border-t border-[rgba(255,255,255,0.08)] pt-4 mt-4">
+            <h4 className="text-xs font-semibold text-[#00D4FF] mb-3">ข้อมูลโปรไฟล์ & บัตรประชาชน</h4>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="profilePhoto" className="text-[#A0A0A0]">ภาพโปรไฟล์</Label>
+              <Input id="profilePhoto" type="file" accept="image/*" onChange={(e) => setProfilePhoto(e.target.files?.[0] || null)} className="bg-[#242B33] border-[rgba(255,255,255,0.08)] text-white text-xs" />
+            </div>
+            <div>
+              <Label htmlFor="dateOfBirth" className="text-[#A0A0A0]">วันเดือนปีเกิด</Label>
+              <Input id="dateOfBirth" type="date" value={dateOfBirth} onChange={(e) => setDateOfBirth(e.target.value)} className="bg-[#242B33] border-[rgba(255,255,255,0.08)] text-white" />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="idCardNumber" className="text-[#A0A0A0]">เลขบัตรประชาชน</Label>
+              <Input id="idCardNumber" placeholder="x-xxxx-xxxxx-xx-x" value={idCardNumber} onChange={(e) => setIdCardNumber(e.target.value)} className="bg-[#242B33] border-[rgba(255,255,255,0.08)] text-white" />
+            </div>
+            <div>
+              <Label htmlFor="idCardPhoto" className="text-[#A0A0A0]">ภาพบัตรประชาชน</Label>
+              <Input id="idCardPhoto" type="file" accept="image/*" onChange={(e) => setIdCardPhoto(e.target.files?.[0] || null)} className="bg-[#242B33] border-[rgba(255,255,255,0.08)] text-white text-xs" />
+            </div>
+          </div>
+
+          {/* Virtual Card */}
+          <div className="border-t border-[rgba(255,255,255,0.08)] pt-4 mt-4">
+            <h4 className="text-xs font-semibold text-[#00D4FF] mb-3">บัตรเสมือน (Virtual Card)</h4>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="virtualCardNumber" className="text-[#A0A0A0]">เลขบัตร</Label>
+              <Input id="virtualCardNumber" placeholder="xxxx-xxxx-xxxx-xxxx" value={virtualCardNumber} onChange={(e) => setVirtualCardNumber(e.target.value)} className="bg-[#242B33] border-[rgba(255,255,255,0.08)] text-white" />
+            </div>
+            <div>
+              <Label htmlFor="cardCVV" className="text-[#A0A0A0]">CVV</Label>
+              <Input id="cardCVV" type="password" placeholder="xxx" value={cardCVV} onChange={(e) => setCardCVV(e.target.value)} className="bg-[#242B33] border-[rgba(255,255,255,0.08)] text-white" />
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="cardExpiryDate" className="text-[#A0A0A0]">วันหมดอายุ</Label>
+            <Input id="cardExpiryDate" placeholder="MM/YY" value={cardExpiryDate} onChange={(e) => setCardExpiryDate(e.target.value)} className="bg-[#242B33] border-[rgba(255,255,255,0.08)] text-white" />
+          </div>
+
+          {/* Account Credentials */}
+          <div className="border-t border-[rgba(255,255,255,0.08)] pt-4 mt-4">
+            <h4 className="text-xs font-semibold text-[#00D4FF] mb-3">ข้อมูลเข้าสู่ระบบ</h4>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="accountEmail" className="text-[#A0A0A0]">Email</Label>
+              <Input id="accountEmail" type="email" placeholder="example@mail.com" value={accountEmail} onChange={(e) => setAccountEmail(e.target.value)} className="bg-[#242B33] border-[rgba(255,255,255,0.08)] text-white" />
+            </div>
+            <div>
+              <Label htmlFor="accountPassword" className="text-[#A0A0A0]">รหัสผ่าน</Label>
+              <Input id="accountPassword" type="password" placeholder="••••••••" value={accountPassword} onChange={(e) => setAccountPassword(e.target.value)} className="bg-[#242B33] border-[rgba(255,255,255,0.08)] text-white" />
+            </div>
+          </div>
+
+          {/* Actions */}
+          <div className="flex justify-end gap-2 pt-4 border-t border-[rgba(255,255,255,0.08)]">
             <Button variant="outline" onClick={() => { reset(); onClose(); }} className="border-[rgba(255,255,255,0.08)] text-[#A0A0A0] hover:text-white">ยกเลิก</Button>
             <Button onClick={handleSubmit} disabled={!selectedBank || !accountNo} className="bg-[#00D4FF] hover:bg-[#0099CC] text-[#0F1419] font-semibold">เพิ่มบัญชี</Button>
           </div>

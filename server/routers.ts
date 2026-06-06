@@ -6,6 +6,8 @@ import { protectedProcedure, publicProcedure, router } from "./_core/trpc";
 import { riskRouter } from "./routers/risk";
 import { pinnedRouter } from "./routers/pinned";
 import { grokRouter } from "./routers/grok";
+import { tasksRouter } from "./routers/tasks";
+import { teamRouter } from "./routers/team";
 import {
   clearUsdtCalculations,
   createAccount,
@@ -232,6 +234,8 @@ export const appRouter = router({
   risk: riskRouter,
   pinned: pinnedRouter,
   grok: grokRouter,
+  tasks: tasksRouter,
+  team: teamRouter,
 });
 
 export type AppRouter = typeof appRouter;
