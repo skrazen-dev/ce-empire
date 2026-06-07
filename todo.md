@@ -14,11 +14,12 @@
 - [ ] ทดสอบ + Checkpoint
 
 ## Task Management + Team Dashboard
-- [ ] ออกแบบ Schema: projects, tasks, team_members, task_assignments tables
-- [ ] สร้าง Backend: tasks.ts + team.ts routers
-- [ ] สร้าง Frontend: KanbanBoard, TeamPanel, TaskDetailModal, Calendar components
-- [ ] เชื่อม Task Management page เข้า Sidebar navigation
-- [ ] ทดสอบ + Checkpoint
+- [x] ออกแบบ Schema: tasks, team_members types
+- [x] สร้าง Store: tasks + teamMembers state + actions
+- [x] สร้าง Frontend: Kanban Board (3 columns) + Team Panel
+- [x] เชื่อม Task Management page เข้า Sidebar navigation
+- [x] เพิ่มสีเฉพาะ (Pink #EC4899) ใน Sidebar
+- [x] ทดสอบ + Tests pass
 
 ## Bank Account Extended Fields
 - [x] เพิ่ม fields ใน accounts schema: profilePhoto, idCardNumber, dateOfBirth, virtualCardNumber, cardCVV, cardExpiry, accountEmail, accountPassword
@@ -69,3 +70,10 @@
 - [x] เพิ่มฟิลด์เวลา (Time)
 - [x] เพิ่ม Checkbox ลงบัญชี (isRecorded)
 - [x] แสดงหมวดหมู่ + ผู้รับ + เวลา + สถานะลงบัญชี ใน Expense card
+
+## Dashboard Charts
+- [x] เพิ่มกราฟยอดฝากรายวัน (Deposits Chart) - แสดง 7 วัน
+- [x] เพิ่มกราฟยอด USDT รายวัน (USDT Chart) - แสดง 7 วัน
+- [x] เพิ่มกราฟกำไรรายวัน (Profit Chart) - แสดง 7 วัน
+- [x] สร้าง 3 กราฟเริ่ม responsive grid layout
+- [x] เพิ่ม hover tooltip แสดงค่าตัวเลข

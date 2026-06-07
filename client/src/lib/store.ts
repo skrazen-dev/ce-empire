@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { BankAccount, Expense, Agent, PageId, UsdtCalc, AppSettings } from './types';
+import type { BankAccount, Expense, Agent, PageId, UsdtCalc, AppSettings, Task, TeamMember, TaskStatus } from './types';
 
 function uid(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -31,6 +31,18 @@ interface AppState {
   addUsdtCalc: (calc: Omit<UsdtCalc, 'id' | 'createdAt'>) => void;
   deleteUsdtCalc: (id: string) => void;
   clearUsdtCalcs: () => void;
+
+  // Tasks
+  tasks: Task[];
+  addTask: (task: Omit<Task, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  updateTask: (id: string, data: Partial<Task>) => void;
+  deleteTask: (id: string) => void;
+  moveTask: (id: string, status: TaskStatus) => void;
+
+  // Team
+  teamMembers: TeamMember[];
+  addTeamMember: (member: Omit<TeamMember, 'id' | 'createdAt'>) => void;
+  deleteTeamMember: (id: string) => void;
 
   // Settings
   settings: AppSettings;
@@ -98,6 +110,32 @@ export const useStore = create<AppState>()(
         set((state) => ({ usdtCalcs: state.usdtCalcs.filter((c) => c.id !== id) })),
       clearUsdtCalcs: () => set({ usdtCalcs: [] }),
 
+      // Tasks
+      tasks: [],
+      addTask: (task) =>
+        set((state) => ({
+          tasks: [...state.tasks, { ...task, id: uid(), createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }],
+        })),
+      updateTask: (id, data) =>
+        set((state) => ({
+          tasks: state.tasks.map((t) => t.id === id ? { ...t, ...data, updatedAt: new Date().toISOString() } : t),
+        })),
+      deleteTask: (id) =>
+        set((state) => ({ tasks: state.tasks.filter((t) => t.id !== id) })),
+      moveTask: (id, status) =>
+        set((state) => ({
+          tasks: state.tasks.map((t) => t.id === id ? { ...t, status, updatedAt: new Date().toISOString() } : t),
+        })),
+
+      // Team
+      teamMembers: [],
+      addTeamMember: (member) =>
+        set((state) => ({
+          teamMembers: [...state.teamMembers, { ...member, id: uid(), createdAt: new Date().toISOString() }],
+        })),
+      deleteTeamMember: (id) =>
+        set((state) => ({ teamMembers: state.teamMembers.filter((m) => m.id !== id) })),
+
       // Settings
       settings: {
         soundEnabled: true,
@@ -118,6 +156,8 @@ export const useStore = create<AppState>()(
         expenses: state.expenses,
         agents: state.agents,
         usdtCalcs: state.usdtCalcs,
+        tasks: state.tasks,
+        teamMembers: state.teamMembers,
         settings: state.settings,
       }),
     }

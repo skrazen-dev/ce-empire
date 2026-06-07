@@ -1,7 +1,7 @@
 import {
   LayoutDashboard, CreditCard, Receipt, Users, CheckCircle2,
   Image, Sparkles, DollarSign, Settings, Calculator, ShieldAlert,
-  Home, BarChart2, FileText, Building2, Bell, UserCircle2, Zap
+  Home, BarChart2, FileText, Building2, Bell, UserCircle2, Zap, ClipboardList
 } from 'lucide-react';
 import { useStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
@@ -34,6 +34,7 @@ const NAV_GROUPS: NavGroup[] = [
       { id: 'agents',        label: 'Agent',          icon: Users,        neonColor: '#A855F7', neonGlow: 'rgba(168,85,247,0.5)' },
       { id: 'status',        label: 'สถานะ',         icon: BarChart2,    neonColor: '#06B6D4', neonGlow: 'rgba(6,182,212,0.5)' },
       { id: 'proof',         label: 'หลักฐาน',       icon: FileText,     neonColor: '#F59E0B', neonGlow: 'rgba(245,158,11,0.5)' },
+      { id: 'tasks',         label: 'จัดการงาน',   icon: ClipboardList, neonColor: '#EC4899', neonGlow: 'rgba(236,72,153,0.5)' },
     ]
   },
   {

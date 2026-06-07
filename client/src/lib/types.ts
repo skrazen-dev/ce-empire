@@ -71,6 +71,31 @@ export interface UsdtCalc {
   createdAt: string;
 }
 
+export type TaskStatus = 'todo' | 'in-progress' | 'done';
+export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent';
+
+export interface Task {
+  id: string;
+  title: string;
+  description?: string;
+  status: TaskStatus;
+  priority: TaskPriority;
+  assigneeId?: string;
+  dueDate?: string;
+  tags?: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TeamMember {
+  id: string;
+  name: string;
+  role: string;
+  avatar?: string;
+  color: string;
+  createdAt: string;
+}
+
 export interface AppSettings {
   soundEnabled: boolean;
   telegramBotToken: string;
@@ -79,4 +104,4 @@ export interface AppSettings {
   theme: 'dark' | 'light';
 }
 
-export type PageId = 'dashboard' | 'accounts' | 'expenses' | 'agents' | 'status' | 'proof' | 'usdt-calc' | 'bulk-calc' | 'settings' | 'risk-analysis';
+export type PageId = 'dashboard' | 'accounts' | 'expenses' | 'agents' | 'status' | 'proof' | 'usdt-calc' | 'bulk-calc' | 'settings' | 'risk-analysis' | 'tasks';

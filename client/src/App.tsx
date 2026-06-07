@@ -16,6 +16,7 @@ import UsdtCalcPage from "@/pages/UsdtCalcPage";
 import SettingsPage from "@/pages/SettingsPage";
 import BulkCalcPage from "@/pages/BulkCalcPage";
 import RiskAnalysisPage from "@/pages/RiskAnalysisPage";
+import TasksPage from "@/pages/TasksPage";
 
 function PageRenderer() {
   const { currentPage } = useStore();
@@ -29,6 +30,7 @@ function PageRenderer() {
     case 'usdt-calc': return <UsdtCalcPage />;
     case 'bulk-calc': return <BulkCalcPage />;
     case 'risk-analysis': return <RiskAnalysisPage />;
+    case 'tasks': return <TasksPage />;
     case 'settings': return <SettingsPage />;
     default: return <DashboardPage />;
   }
