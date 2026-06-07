@@ -34,3 +34,38 @@
 - [x] ลบ Grok chat เอาฟีเจอร์ที่มีประโยชน์มากกว่า
 - [x] เชื่อ SummaryStatsCard ใน Dashboard
 - [x] เชื่อ Slip upload backend
+
+## Sidebar Restructure + Button Styling
+- [x] รวมเมนูเป็นหมวดหมู่: Dashboard, Data Display, Tools, Settings
+- [x] เพิ่มสีเฉพาะตัวให้แต่ละเมนู/หมวด
+- [x] ปรับปุ่มให้เด่น ชัดเจน (ขนาด ขอบ เงา)
+- [x] ทดสอบ Sidebar navigation
+- [x] เพิ่ม Account Status section และ Copy buttons
+
+## Agent Page Enhancement
+- [x] เพิ่มฟิลด์ใน agents table: withdrawAmount, pendingAmount, startDate
+- [x] อัปเดต Agent page: แสดง ยอดเบิก/ยอดค้าง/บัญชีรับผิดชอบ/วันเริ่มงาน
+- [x] สร้าง Agent detail modal/card
+- [x] เพิ่มแสดง บัญชีที่รับผิดชอบ (Linked Accounts)
+
+## Accounts Page Enhancement
+- [x] เพิ่มหมวด "Account Status" ใน Accounts page
+- [x] เพิ่ม Checkbox: แอคตัดครบ/Skrill/Neteller/BigPay
+- [x] เพิ่มตัวเลือกวงเงิน: 50k/200k/500k
+- [x] อัปเดต accounts schema: accountType, accountStatus, creditLimit
+
+## Expenses Page Enhancement
+- [x] เพิ่มตัวเลือกวันที่ (date picker) ใน Expenses page
+- [x] อัปเดต expenses schema: date field
+
+## Testing & Checkpoint
+- [x] ทดสอบทุกเมนู + ปุ่ม
+- [x] เขียน Unit tests สำหรับ new features
+- [x] Checkpoint
+
+## Expenses Page Enhancement - Categories
+- [x] เพิ่มหมวดหมู่ (Categories): นายหน้าเบิก, เด็กเบิก, ค่าข้าว, ค่าน้ำมัน/เดินทาง, ค่าธรรมเนียม, ค่าแรง
+- [x] เพิ่มฟิลด์ผู้รับ (Recipient)
+- [x] เพิ่มฟิลด์เวลา (Time)
+- [x] เพิ่ม Checkbox ลงบัญชี (isRecorded)
+- [x] แสดงหมวดหมู่ + ผู้รับ + เวลา + สถานะลงบัญชี ใน Expense card

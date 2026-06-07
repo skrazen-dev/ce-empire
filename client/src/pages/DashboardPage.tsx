@@ -88,14 +88,14 @@ export default function DashboardPage() {
   return (
     <div className="animate-fade-up space-y-4 sm:space-y-5">
       {/* ── Hero Section ── */}
-      <section className="relative overflow-hidden rounded-2xl p-5 sm:p-6" style={{ background: `url(${HERO_BG}) center/cover no-repeat` }}>
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0A0F1A]/92 via-[#0A0F1A]/70 to-transparent" />
-        {/* Decorative blur orbs */}
-        <div className="absolute top-0 right-0 w-32 h-32 rounded-full bg-blue-600/20 blur-3xl" />
-        <div className="absolute bottom-0 right-8 w-20 h-20 rounded-full bg-pink-500/15 blur-2xl" />
+      <section className="relative overflow-hidden rounded-2xl p-5 sm:p-6 border border-cyan-500/20" style={{ background: `linear-gradient(135deg, rgba(10, 14, 39, 0.9), rgba(15, 21, 53, 0.8)), url(${HERO_BG}) center/cover no-repeat` }}>
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0A0E27]/95 via-[#0F1535]/75 to-transparent" />
+        {/* Decorative blur orbs - Cosmic Blueprint */}
+        <div className="absolute top-0 right-0 w-40 h-40 rounded-full bg-cyan-500/15 blur-3xl" />
+        <div className="absolute bottom-0 right-8 w-24 h-24 rounded-full bg-orange-500/10 blur-2xl" />
         <div className="relative z-10">
-          <p className="text-[10px] font-bold text-blue-400 tracking-[0.22em] uppercase mb-1.5 font-heading">Overview</p>
-          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-white font-heading">CE Empire</h2>
+          <p className="text-[10px] font-bold text-cyan-400 tracking-[0.22em] uppercase mb-1.5 font-heading">Overview</p>
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-cyan-100 font-heading">CE Empire</h2>
           <p className="text-xs text-slate-400 mt-1"></p>
           <div className="flex items-center gap-1.5 mt-2.5">
             <div className="status-pulse-green w-1.5 h-1.5 rounded-full bg-emerald-500" />
@@ -104,8 +104,8 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* ── Metrics Cards ── */}
-      <section className="grid grid-cols-2 gap-3">
+      {/* ── Metrics Cards - Asymmetric Grid ── */}
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 auto-rows-max">
         {metrics.map((m, i) => {
           const Icon = m.icon;
           return (

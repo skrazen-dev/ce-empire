@@ -53,6 +53,9 @@ export const accounts = mysqlTable("accounts", {
   cardExpiryDate: varchar("cardExpiryDate", { length: 10 }),
   accountEmail: varchar("accountEmail", { length: 320 }),
   accountPassword: varchar("accountPassword", { length: 255 }),
+  accountType: mysqlEnum("accountType", ["complete", "skrill", "neteller", "bigpay"]),
+  accountStatus: varchar("accountStatus", { length: 50 }),
+  creditLimit: mysqlEnum("creditLimit", ["50k", "200k", "500k"]),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -69,6 +72,9 @@ export const agents = mysqlTable("agents", {
   lineId: varchar("lineId", { length: 100 }),
   note: text("note"),
   isActive: mysqlEnum("isActive", ["yes", "no"]).default("yes").notNull(),
+  withdrawAmount: decimal("withdrawAmount", { precision: 15, scale: 2 }).default("0.00"),
+  pendingAmount: decimal("pendingAmount", { precision: 15, scale: 2 }).default("0.00"),
+  startDate: timestamp("startDate"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });
@@ -88,6 +94,7 @@ export const expenses = mysqlTable("expenses", {
   status: mysqlEnum("status", ["pending", "paid", "cancelled"]).default("pending").notNull(),
   proofUrl: text("proofUrl"),
   proofKey: text("proofKey"),
+  expenseDate: timestamp("expenseDate"),
   dueDate: timestamp("dueDate"),
   paidAt: timestamp("paidAt"),
   note: text("note"),

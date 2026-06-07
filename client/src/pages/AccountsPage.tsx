@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Plus, Search, Trash2, Eye, EyeOff } from 'lucide-react';
+import { Plus, Search, Trash2, Eye, EyeOff, Copy, Check } from 'lucide-react';
 import { useStore } from '@/lib/store';
 import { getBankByCode, BANKS } from '@/lib/banks';
 import { money, maskAccountNo } from '@/lib/format';
@@ -14,6 +14,7 @@ export default function AccountsPage() {
   const { accounts, addAccount, deleteAccount } = useStore();
   const [showForm, setShowForm] = useState(false);
   const [revealedPins, setRevealedPins] = useState<Set<string>>(new Set());
+  const [copiedField, setCopiedField] = useState<string | null>(null);
 
   const togglePin = (id: string) => {
     setRevealedPins((prev) => {
@@ -23,6 +24,12 @@ export default function AccountsPage() {
     });
   };
 
+  const copyToClipboard = (text: string, fieldId: string) => {
+    navigator.clipboard.writeText(text);
+    setCopiedField(fieldId);
+    setTimeout(() => setCopiedField(null), 2000);
+  };
+
   return (
     <div className="animate-fade-up space-y-4">
       <div className="flex items-center justify-between">
@@ -30,7 +37,7 @@ export default function AccountsPage() {
           <h2 className="text-lg font-bold text-white">บัญชีทั้งหมด</h2>
           <p className="text-xs text-[#A0A0A0]">{accounts.length} บัญชี</p>
         </div>
-        <Button onClick={() => setShowForm(true)} className="gap-2 bg-[#00D4FF] hover:bg-[#0099CC] text-[#0F1419] font-semibold text-xs active:scale-95 transition-transform">
+        <Button onClick={() => setShowForm(true)} className="gap-2 bg-[#FF8C42] hover:bg-[#E67E2F] text-white font-semibold text-xs active:scale-95 transition-transform">
           <Plus size={14} /> เพิ่มบัญชี
         </Button>
       </div>
@@ -44,12 +51,13 @@ export default function AccountsPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="space-y-3">
           {accounts.map((acc) => {
             const bank = getBankByCode(acc.bankCode);
             return (
-              <Card key={acc.id} className="bg-[#1A1F26] border-[rgba(255,255,255,0.06)] group hover:border-[#00D4FF]/20 transition-colors">
+              <Card key={acc.id} className="bg-[#1A1F26] border-[rgba(255,140,66,0.15)] group hover:border-[#FF8C42]/30 transition-colors">
                 <CardContent className="p-4">
+                  {/* Header */}
                   <div className="flex items-center gap-3 mb-3">
                     {bank && (
                       <img src={bank.icon} alt={bank.name} className="w-10 h-10 rounded-xl object-contain bg-white/5 p-1" />
@@ -66,7 +74,9 @@ export default function AccountsPage() {
                       <Trash2 size={14} />
                     </button>
                   </div>
-                  <div className="flex items-center justify-between text-xs">
+
+                  {/* Owner Info */}
+                  <div className="flex items-center justify-between text-xs mb-3">
                     <span className="text-[#A0A0A0]">{acc.firstName} {acc.lastName}</span>
                     <button
                       onClick={() => togglePin(acc.id)}
@@ -76,7 +86,9 @@ export default function AccountsPage() {
                       <span className="font-mono">{revealedPins.has(acc.id) ? acc.pin : '••••'}</span>
                     </button>
                   </div>
-                  <div className="grid grid-cols-2 gap-2 mt-3 pt-3 border-t border-[rgba(255,255,255,0.06)]">
+
+                  {/* Payment Status */}
+                  <div className="grid grid-cols-2 gap-2 mb-3 pb-3 border-b border-[rgba(255,255,255,0.06)]">
                     <div>
                       <p className="text-[10px] text-[#A0A0A0]">จ่ายแล้ว</p>
                       <p className="text-sm font-semibold text-[#10B981]">฿{money(acc.paidAmount)}</p>
@@ -84,6 +96,170 @@ export default function AccountsPage() {
                     <div>
                       <p className="text-[10px] text-[#A0A0A0]">ค้างจ่าย</p>
                       <p className="text-sm font-semibold text-[#EF4444]">฿{money(acc.dueAmount)}</p>
+                    </div>
+                  </div>
+
+                  {/* Account Status Section */}
+                  <div className="space-y-2">
+                    <p className="text-[10px] font-bold text-[#FF8C42] uppercase tracking-widest">สถานะบัญชี</p>
+
+                    {/* Account Type & Credit Limit */}
+                    {(acc.accountType || acc.creditLimit) && (
+                      <div className="grid grid-cols-2 gap-2 mb-2">
+                        {acc.accountType && (
+                          <div className="px-2 py-1.5 rounded-lg bg-[#FF8C42]/10 border border-[#FF8C42]/20">
+                            <p className="text-[9px] text-[#A0A0A0]">ประเภท</p>
+                            <p className="text-xs font-semibold text-[#FF8C42]">{acc.accountType === 'complete' ? 'แอคตัดครบ' : acc.accountType?.toUpperCase()}</p>
+                          </div>
+                        )}
+                        {acc.creditLimit && (
+                          <div className="px-2 py-1.5 rounded-lg bg-[#FF8C42]/10 border border-[#FF8C42]/20">
+                            <p className="text-[9px] text-[#A0A0A0]">วงเงิน</p>
+                            <p className="text-xs font-semibold text-[#FF8C42]">{acc.creditLimit}</p>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Account Details with Copy Buttons */}
+                    <div className="space-y-1 text-[9px]">
+                      {/* Account Number */}
+                      <div className="flex items-center justify-between px-2 py-1.5 rounded-lg bg-[#0F1419]/50 group/copy hover:bg-[#0F1419]/70 transition-colors">
+                        <div className="flex-1 min-w-0">
+                          <span className="text-[#A0A0A0]">เลขบช: </span>
+                          <span className="text-white font-mono text-[8px]">{acc.accountNo}</span>
+                        </div>
+                        <button
+                          onClick={() => copyToClipboard(acc.accountNo, `acc-${acc.id}`)}
+                          className="ml-2 p-1 rounded hover:bg-[#FF8C42]/20 transition-all"
+                          title="คัดลอก"
+                        >
+                          {copiedField === `acc-${acc.id}` ? (
+                            <Check size={10} className="text-[#10B981]" />
+                          ) : (
+                            <Copy size={10} className="text-[#A0A0A0] hover:text-[#FF8C42]" />
+                          )}
+                        </button>
+                      </div>
+
+                      {/* Name */}
+                      <div className="flex items-center justify-between px-2 py-1.5 rounded-lg bg-[#0F1419]/50 group/copy hover:bg-[#0F1419]/70 transition-colors">
+                        <div className="flex-1 min-w-0">
+                          <span className="text-[#A0A0A0]">ชื่อ: </span>
+                          <span className="text-white text-[8px]">{acc.firstName} {acc.lastName}</span>
+                        </div>
+                        <button
+                          onClick={() => copyToClipboard(`${acc.firstName} ${acc.lastName}`, `name-${acc.id}`)}
+                          className="ml-2 p-1 rounded hover:bg-[#FF8C42]/20 transition-all"
+                        >
+                          {copiedField === `name-${acc.id}` ? (
+                            <Check size={10} className="text-[#10B981]" />
+                          ) : (
+                            <Copy size={10} className="text-[#A0A0A0] hover:text-[#FF8C42]" />
+                          )}
+                        </button>
+                      </div>
+
+                      {/* Phone */}
+                      {acc.linkedPhone && (
+                        <div className="flex items-center justify-between px-2 py-1.5 rounded-lg bg-[#0F1419]/50 group/copy hover:bg-[#0F1419]/70 transition-colors">
+                          <div className="flex-1 min-w-0">
+                            <span className="text-[#A0A0A0]">เบอร์: </span>
+                            <span className="text-white font-mono text-[8px]">{acc.linkedPhone}</span>
+                          </div>
+                          <button
+                            onClick={() => copyToClipboard(acc.linkedPhone, `phone-${acc.id}`)}
+                            className="ml-2 p-1 rounded hover:bg-[#FF8C42]/20 transition-all"
+                          >
+                            {copiedField === `phone-${acc.id}` ? (
+                              <Check size={10} className="text-[#10B981]" />
+                            ) : (
+                              <Copy size={10} className="text-[#A0A0A0] hover:text-[#FF8C42]" />
+                            )}
+                          </button>
+                        </div>
+                      )}
+
+                      {/* ID Card */}
+                      {acc.idCardNumber && (
+                        <div className="flex items-center justify-between px-2 py-1.5 rounded-lg bg-[#0F1419]/50 group/copy hover:bg-[#0F1419]/70 transition-colors">
+                          <div className="flex-1 min-w-0">
+                            <span className="text-[#A0A0A0]">บปป: </span>
+                            <span className="text-white font-mono text-[8px]">{acc.idCardNumber}</span>
+                          </div>
+                          <button
+                            onClick={() => copyToClipboard(acc.idCardNumber || '', `id-${acc.id}`)}
+                            className="ml-2 p-1 rounded hover:bg-[#FF8C42]/20 transition-all"
+                          >
+                            {copiedField === `id-${acc.id}` ? (
+                              <Check size={10} className="text-[#10B981]" />
+                            ) : (
+                              <Copy size={10} className="text-[#A0A0A0] hover:text-[#FF8C42]" />
+                            )}
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Virtual Card */}
+                      {acc.virtualCardNumber && (
+                        <div className="flex items-center justify-between px-2 py-1.5 rounded-lg bg-[#0F1419]/50 group/copy hover:bg-[#0F1419]/70 transition-colors">
+                          <div className="flex-1 min-w-0">
+                            <span className="text-[#A0A0A0]">บัตรเสมือน: </span>
+                            <span className="text-white font-mono text-[8px]">{acc.virtualCardNumber}</span>
+                          </div>
+                          <button
+                            onClick={() => copyToClipboard(acc.virtualCardNumber || '', `vcard-${acc.id}`)}
+                            className="ml-2 p-1 rounded hover:bg-[#FF8C42]/20 transition-all"
+                          >
+                            {copiedField === `vcard-${acc.id}` ? (
+                              <Check size={10} className="text-[#10B981]" />
+                            ) : (
+                              <Copy size={10} className="text-[#A0A0A0] hover:text-[#FF8C42]" />
+                            )}
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Email */}
+                      {acc.accountEmail && (
+                        <div className="flex items-center justify-between px-2 py-1.5 rounded-lg bg-[#0F1419]/50 group/copy hover:bg-[#0F1419]/70 transition-colors">
+                          <div className="flex-1 min-w-0">
+                            <span className="text-[#A0A0A0]">Email: </span>
+                            <span className="text-white text-[8px]">{acc.accountEmail}</span>
+                          </div>
+                          <button
+                            onClick={() => copyToClipboard(acc.accountEmail || '', `email-${acc.id}`)}
+                            className="ml-2 p-1 rounded hover:bg-[#FF8C42]/20 transition-all"
+                          >
+                            {copiedField === `email-${acc.id}` ? (
+                              <Check size={10} className="text-[#10B981]" />
+                            ) : (
+                              <Copy size={10} className="text-[#A0A0A0] hover:text-[#FF8C42]" />
+                            )}
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Password */}
+                      {acc.accountPassword && (
+                        <div className="flex items-center justify-between px-2 py-1.5 rounded-lg bg-[#0F1419]/50 group/copy hover:bg-[#0F1419]/70 transition-colors">
+                          <div className="flex-1 min-w-0">
+                            <span className="text-[#A0A0A0]">Pass: </span>
+                            <span className="text-white font-mono text-[8px]">••••••••</span>
+                          </div>
+                          <button
+                            onClick={() => copyToClipboard(acc.accountPassword || '', `pass-${acc.id}`)}
+                            className="ml-2 p-1 rounded hover:bg-[#FF8C42]/20 transition-all"
+                            title="คัดลอกรหัสผ่าน"
+                          >
+                            {copiedField === `pass-${acc.id}` ? (
+                              <Check size={10} className="text-[#10B981]" />
+                            ) : (
+                              <Copy size={10} className="text-[#A0A0A0] hover:text-[#FF8C42]" />
+                            )}
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </CardContent>
@@ -117,6 +293,8 @@ function AccountFormDialog({ open, onClose }: { open: boolean; onClose: () => vo
   const [cardExpiryDate, setCardExpiryDate] = useState('');
   const [accountEmail, setAccountEmail] = useState('');
   const [accountPassword, setAccountPassword] = useState('');
+  const [accountType, setAccountType] = useState<'complete' | 'skrill' | 'neteller' | 'bigpay' | ''>('');
+  const [creditLimit, setCreditLimit] = useState<'50k' | '200k' | '500k' | ''>('');
 
   const reset = () => {
     setSelectedBank(''); setAccountNo(''); setPhone('');
@@ -125,6 +303,7 @@ function AccountFormDialog({ open, onClose }: { open: boolean; onClose: () => vo
     setProfilePhoto(null); setIdCardNumber(''); setIdCardPhoto(null);
     setDateOfBirth(''); setVirtualCardNumber(''); setCardCVV('');
     setCardExpiryDate(''); setAccountEmail(''); setAccountPassword('');
+    setAccountType(''); setCreditLimit('');
   };
 
   const handleSubmit = () => {
@@ -138,6 +317,8 @@ function AccountFormDialog({ open, onClose }: { open: boolean; onClose: () => vo
       pin,
       paidAmount: parseFloat(paid) || 0,
       dueAmount: parseFloat(due) || 0,
+      accountType: accountType as any,
+      creditLimit: creditLimit as any,
     });
     reset();
     onClose();
@@ -145,7 +326,7 @@ function AccountFormDialog({ open, onClose }: { open: boolean; onClose: () => vo
 
   return (
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-[#1A1F26] border-[rgba(255,255,255,0.08)]">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-[#1A1F26] border-[rgba(255,140,66,0.15)]">
         <DialogHeader>
           <DialogTitle className="text-white">เพิ่มบัญชี</DialogTitle>
         </DialogHeader>
@@ -162,8 +343,8 @@ function AccountFormDialog({ open, onClose }: { open: boolean; onClose: () => vo
                   className={cn(
                     'flex flex-col items-center gap-1 p-2 rounded-xl border transition-all text-center active:scale-95',
                     selectedBank === bank.code
-                      ? 'border-[#00D4FF] bg-[#00D4FF]/10 ring-2 ring-[#00D4FF]/30'
-                      : 'border-[rgba(255,255,255,0.08)] hover:border-[#00D4FF]/30 hover:bg-[#242B33]'
+                      ? 'border-[#FF8C42] bg-[#FF8C42]/10 ring-2 ring-[#FF8C42]/30'
+                      : 'border-[rgba(255,255,255,0.08)] hover:border-[#FF8C42]/30 hover:bg-[#242B33]'
                   )}
                   title={bank.fullname}
                 >
@@ -209,6 +390,48 @@ function AccountFormDialog({ open, onClose }: { open: boolean; onClose: () => vo
             <div>
               <Label htmlFor="due" className="text-[#A0A0A0]">ค้างจ่าย</Label>
               <Input id="due" type="number" value={due} onChange={(e) => setDue(e.target.value)} className="bg-[#242B33] border-[rgba(255,255,255,0.08)] text-white" />
+            </div>
+          </div>
+
+          {/* Account Status */}
+          <div className="border-t border-[rgba(255,255,255,0.08)] pt-4 mt-4">
+            <h4 className="text-xs font-semibold text-[#FF8C42] mb-3">สถานะบัญชี</h4>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label className="text-[#A0A0A0] mb-2 block">ประเภทบัญชี</Label>
+              <div className="grid grid-cols-2 gap-2">
+                {['complete', 'skrill', 'neteller', 'bigpay'].map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => setAccountType(type as any)}
+                    className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                      accountType === type
+                        ? 'bg-[#FF8C42] text-white border-[#FF8C42]'
+                        : 'bg-[#242B33] border border-[rgba(255,255,255,0.08)] text-[#A0A0A0] hover:border-[#FF8C42]/30'
+                    }`}
+                  >
+                    {type === 'complete' ? 'แอคตัดครบ' : type.toUpperCase()}
+                  </button>
+                ))}</div>
+            </div>
+            <div>
+              <Label className="text-[#A0A0A0] mb-2 block">วงเงิน</Label>
+              <div className="grid grid-cols-3 gap-2">
+                {['50k', '200k', '500k'].map((limit) => (
+                  <button
+                    key={limit}
+                    onClick={() => setCreditLimit(limit as any)}
+                    className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
+                      creditLimit === limit
+                        ? 'bg-[#FF8C42] text-white border-[#FF8C42]'
+                        : 'bg-[#242B33] border border-[rgba(255,255,255,0.08)] text-[#A0A0A0] hover:border-[#FF8C42]/30'
+                    }`}
+                  >
+                    {limit}
+                  </button>
+                ))}</div>
             </div>
           </div>
 
@@ -278,8 +501,8 @@ function AccountFormDialog({ open, onClose }: { open: boolean; onClose: () => vo
 
           {/* Actions */}
           <div className="flex justify-end gap-2 pt-4 border-t border-[rgba(255,255,255,0.08)]">
-            <Button variant="outline" onClick={() => { reset(); onClose(); }} className="border-[rgba(255,255,255,0.08)] text-[#A0A0A0] hover:text-white">ยกเลิก</Button>
-            <Button onClick={handleSubmit} disabled={!selectedBank || !accountNo} className="bg-[#00D4FF] hover:bg-[#0099CC] text-[#0F1419] font-semibold">เพิ่มบัญชี</Button>
+            <Button variant="outline" onClick={() => { reset(); onClose(); }} className="border-[rgba(255,255,255,0.08)] text-[#A0A0A0]">ยกเลิก</Button>
+            <Button onClick={handleSubmit} disabled={!selectedBank || !accountNo} className="bg-[#FF8C42] hover:bg-[#E67E2F] text-white font-semibold">เพิ่มบัญชี</Button>
           </div>
         </div>
       </DialogContent>

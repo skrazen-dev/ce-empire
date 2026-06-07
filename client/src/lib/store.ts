@@ -23,7 +23,7 @@ interface AppState {
   deleteExpense: (id: string) => void;
 
   agents: Agent[];
-  addAgent: (name: string) => void;
+  addAgent: (agent: Omit<Agent, 'id' | 'createdAt'> | string) => void;
   deleteAgent: (id: string) => void;
 
   // USDT Calc History
@@ -70,10 +70,21 @@ export const useStore = create<AppState>()(
         set((state) => ({ expenses: state.expenses.filter((e) => e.id !== id) })),
 
       agents: [],
-      addAgent: (name) =>
+      addAgent: (agent) => {
+        const agentData = typeof agent === 'string' 
+          ? { name: agent }
+          : agent;
         set((state) => ({
-          agents: [...state.agents, { id: uid(), name, createdAt: new Date().toISOString() }],
-        })),
+          agents: [...state.agents, { 
+            id: uid(), 
+            ...agentData,
+            withdrawAmount: agentData.withdrawAmount || 0,
+            pendingAmount: agentData.pendingAmount || 0,
+            startDate: agentData.startDate ? new Date(agentData.startDate).toISOString() : new Date().toISOString(),
+            createdAt: new Date().toISOString() 
+          }],
+        }));
+      },
       deleteAgent: (id) =>
         set((state) => ({ agents: state.agents.filter((a) => a.id !== id) })),
 

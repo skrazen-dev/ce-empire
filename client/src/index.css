@@ -45,12 +45,16 @@
   --font-heading: 'Poppins', 'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif;
   --font-sans: 'Inter', 'Noto Sans Thai', ui-sans-serif, system-ui, sans-serif;
 
-  /* ── Premium Color Tokens ── */
-  --color-blue-primary: #2563EB;
-  --color-blue-light: #3B82F6;
-  --color-blue-dark: #1D4ED8;
-  --color-pink-accent: #EC4899;
-  --color-pink-light: #F472B6;
+  /* ── Cosmic Blueprint Color Tokens ── */
+  --color-navy-dark: #0A0E27;
+  --color-navy-base: #0F1535;
+  --color-navy-light: #1A2847;
+  --color-electric-blue: #00D9FF;
+  --color-electric-blue-dark: #0099CC;
+  --color-electric-blue-light: #33E5FF;
+  --color-warm-orange: #FF8C42;
+  --color-warm-orange-light: #FFB366;
+  --color-warm-orange-dark: #FF6B1A;
   --color-success: #10B981;
   --color-success-light: #34D399;
   --color-warning: #F59E0B;
@@ -78,24 +82,24 @@
   --chart-4: #F59E0B;
   --chart-5: #00D4FF;
 
-  /* Backgrounds */
-  --background: #0A0F1A;
-  --foreground: #F1F5F9;
-  --card: #111827;
-  --card-foreground: #F1F5F9;
-  --popover: #111827;
-  --popover-foreground: #F1F5F9;
-  --secondary: #1E293B;
-  --secondary-foreground: #94A3B8;
-  --muted: #1E293B;
-  --muted-foreground: #64748B;
-  --accent: #1E293B;
-  --accent-foreground: #F1F5F9;
+  /* Cosmic Blueprint Backgrounds */
+  --background: #0A0E27;
+  --foreground: #E0E8FF;
+  --card: #0F1535;
+  --card-foreground: #E0E8FF;
+  --popover: #1A2847;
+  --popover-foreground: #E0E8FF;
+  --secondary: #1A2847;
+  --secondary-foreground: #A0AEFF;
+  --muted: #0F1535;
+  --muted-foreground: #7080B8;
+  --accent: #FF8C42;
+  --accent-foreground: #0A0E27;
   --destructive: #EF4444;
   --destructive-foreground: #FFFFFF;
-  --border: rgba(148, 163, 184, 0.1);
-  --input: rgba(148, 163, 184, 0.08);
-  --ring: #2563EB;
+  --border: rgba(0, 217, 255, 0.1);
+  --input: rgba(0, 217, 255, 0.08);
+  --ring: #00D9FF;
 
   /* Sidebar */
   --sidebar: #0A0F1A;

@@ -43,6 +43,13 @@
       "when": 1780730248031,
       "tag": "0005_illegal_centennial",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1780819609752,
+      "tag": "0006_good_solo",
+      "breakpoints": true
     }
   ]
 }

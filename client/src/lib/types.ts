@@ -8,6 +8,15 @@ export interface BankAccount {
   pin: string;
   paidAmount: number;
   dueAmount: number;
+  accountType?: 'complete' | 'skrill' | 'neteller' | 'bigpay';
+  accountStatus?: string;
+  creditLimit?: '50k' | '200k' | '500k';
+  idCardNumber?: string;
+  virtualCardNumber?: string;
+  cardCVV?: string;
+  cardExpiryDate?: string;
+  accountEmail?: string;
+  accountPassword?: string;
   virtual1?: VirtualCard;
   virtual2?: VirtualCard;
   walletAccounts?: string[];
@@ -31,15 +40,22 @@ export interface Expense {
   description: string;
   amount: number;
   type: 'paid' | 'pending';
-  category?: string;
+  category?: 'นายหน้าเบิก' | 'เด็กเบิก' | 'ค่าข้าว' | 'ค่าน้ำมัน/เดินทาง' | 'ค่าธรรมเนียม' | 'ค่าแรง';
+  recipient?: string;
   note?: string;
   slipImage?: string;
+  expenseDate?: string | Date;
+  expenseTime?: string;
+  isRecorded?: boolean;
   createdAt: string;
 }
 
 export interface Agent {
   id: string;
   name: string;
+  withdrawAmount?: number;
+  pendingAmount?: number;
+  startDate?: string | Date;
   createdAt: string;
 }
 
