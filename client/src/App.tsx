@@ -2,6 +2,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { SoundProvider } from "./contexts/SoundContext";
 import { useStore } from "@/lib/store";
 import { TopBar } from "@/components/layout/TopBar";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -17,6 +18,8 @@ import SettingsPage from "@/pages/SettingsPage";
 import BulkCalcPage from "@/pages/BulkCalcPage";
 import RiskAnalysisPage from "@/pages/RiskAnalysisPage";
 import TasksPage from "@/pages/TasksPage";
+import LoadingScreen from "@/components/LoadingScreen";
+import { useState } from "react";
 
 function PageRenderer() {
   const { currentPage } = useStore();
@@ -52,13 +55,20 @@ function AppLayout() {
 }
 
 function App() {
+  const [loaded, setLoaded] = useState(false);
+
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="dark">
-        <TooltipProvider>
-          <Toaster />
-          <AppLayout />
-        </TooltipProvider>
+        <SoundProvider>
+          <TooltipProvider>
+            <Toaster />
+            {!loaded && <LoadingScreen onComplete={() => setLoaded(true)} />}
+            <div className={`transition-opacity duration-500 ${loaded ? 'opacity-100' : 'opacity-0'}`}>
+              <AppLayout />
+            </div>
+          </TooltipProvider>
+        </SoundProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );

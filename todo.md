@@ -77,3 +77,20 @@
 - [x] เพิ่มกราฟกำไรรายวัน (Profit Chart) - แสดง 7 วัน
 - [x] สร้าง 3 กราฟเริ่ม responsive grid layout
 - [x] เพิ่ม hover tooltip แสดงค่าตัวเลข
+
+## Loading Screen + Sound Effects
+- [x] สร้าง LoadingScreen component - CE Empire branding + animation
+- [x] สร้าง useSoundEffect hook - เสียงเอฟเฟคไทยทุกปุ่ม
+- [x] เพิ่มเสียง: คลิก, สำเร็จ, ลบ, แจ้งเตือน, เปิดแอป
+- [x] เชื่อม Sound hook กับทุกปุ่มใน App
+- [x] ทดสอบ + Checkpoint
+
+## Bug Fixes - All Buttons Working
+- [x] MobileNav: เพิ่มเมนูครบทุกหน้า (Tasks, USDT, Bulk, Risk, Settings)
+- [x] MobileNav: แก้ Grok button ไม่มี onClick
+- [x] TopBar: เพิ่ม mobile search toggle + clear button
+- [x] TopBar: Bell notification แสดงยอดค้างจ่าย + toast
+- [x] TopBar: Sound toggle button
+- [x] ExpensesPage: Category filter chips ทำงานได้จริง
+- [x] ExpensesPage: Slip image ถูก save ตอน submit
+- [x] ProofPage: ปุ่มอัปโหลดทำงานได้จริง + lightbox viewer + download

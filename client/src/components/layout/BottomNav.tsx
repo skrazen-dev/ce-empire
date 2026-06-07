@@ -2,6 +2,7 @@ import { LayoutDashboard, CreditCard, Receipt, Users, CheckCircle2, Image, Dolla
 import { useStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
 import type { PageId } from '@/lib/types';
+import { useSound } from '@/contexts/SoundContext';
 
 const NAV_ITEMS: { id: PageId; label: string; icon: typeof LayoutDashboard }[] = [
   { id: 'dashboard', label: 'หน้าหลัก', icon: LayoutDashboard },
@@ -18,6 +19,7 @@ const NAV_ITEMS: { id: PageId; label: string; icon: typeof LayoutDashboard }[] =
 
 export function BottomNav() {
   const { currentPage, setPage } = useStore();
+  const { play } = useSound();
 
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40">
@@ -29,7 +31,7 @@ export function BottomNav() {
             return (
               <button
                 key={item.id}
-                onClick={() => setPage(item.id)}
+                onClick={() => { play('click'); setPage(item.id); }}
                 className={cn(
                   'flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-all active:scale-90 min-w-[48px]',
                   active ? 'text-[#00D4FF]' : 'text-[#A0A0A0]'

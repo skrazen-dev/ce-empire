@@ -6,6 +6,7 @@ import {
 import { useStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
 import type { PageId } from '@/lib/types';
+import { useSound } from '@/contexts/SoundContext';
 
 // Nav items grouped by category with distinct colors
 interface NavGroup {
@@ -55,6 +56,7 @@ const NAV_GROUPS: NavGroup[] = [
 
 export function Sidebar() {
   const { currentPage, setPage } = useStore();
+  const { play } = useSound();
 
   return (
     <aside className="hidden lg:flex flex-col w-[220px] shrink-0 h-[calc(100vh-72px)] sticky top-[72px] py-4 pr-2 overflow-y-auto">
@@ -70,7 +72,7 @@ export function Sidebar() {
               return (
                 <button
                   key={item.id}
-                  onClick={() => setPage(item.id)}
+                  onClick={() => { play('click'); setPage(item.id); }}
                   className={cn(
                     'group flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 text-left w-full relative overflow-hidden',
                     active

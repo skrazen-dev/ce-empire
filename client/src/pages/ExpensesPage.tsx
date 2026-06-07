@@ -26,11 +26,13 @@ const EXPENSE_CATEGORIES: { value: CategoryType; label: string; color: string }[
 export default function ExpensesPage() {
   const { expenses, accounts, agents } = useStore();
   const [filter, setFilter] = useState<FilterType>('all');
+  const [categoryFilter, setCategoryFilter] = useState<CategoryType | 'all'>('all');
   const [showForm, setShowForm] = useState(false);
 
   const filtered = expenses.filter((e) => {
-    if (filter === 'paid') return e.type === 'paid';
-    if (filter === 'pending') return e.type === 'pending';
+    if (filter === 'paid' && e.type !== 'paid') return false;
+    if (filter === 'pending' && e.type !== 'pending') return false;
+    if (categoryFilter !== 'all' && e.category !== categoryFilter) return false;
     return true;
   });
 
@@ -67,14 +69,27 @@ export default function ExpensesPage() {
 
       {/* Category Filter */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2">
+        <button
+          onClick={() => setCategoryFilter('all')}
+          className={cn(
+            'px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap border transition-all active:scale-95',
+            categoryFilter === 'all'
+              ? 'bg-white/10 text-white border-white/30'
+              : 'text-[#A0A0A0] border-transparent hover:bg-[#1E2730]'
+          )}
+        >
+          ทั้งหมด
+        </button>
         {EXPENSE_CATEGORIES.map((cat) => (
           <button
             key={cat.value}
+            onClick={() => setCategoryFilter(categoryFilter === cat.value ? 'all' : cat.value)}
             className="px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap border transition-all active:scale-95"
             style={{
               borderColor: cat.color,
-              color: cat.color,
-              backgroundColor: `${cat.color}10`,
+              color: categoryFilter === cat.value ? '#fff' : cat.color,
+              backgroundColor: categoryFilter === cat.value ? cat.color : `${cat.color}10`,
+              boxShadow: categoryFilter === cat.value ? `0 0 8px ${cat.color}60` : 'none',
             }}
           >
             {cat.label}
@@ -164,20 +179,33 @@ function ExpenseFormDialog({ open, onClose }: { open: boolean; onClose: () => vo
 
   const handleSubmit = () => {
     if (!desc || !amount) return;
-    addExpense({
-      description: desc,
-      amount: parseFloat(amount) || 0,
-      type,
-      category: category as CategoryType | undefined,
-      recipient,
-      accountId: accountId || undefined,
-      agentId: agentId || undefined,
-      expenseDate,
-      expenseTime,
-      isRecorded,
-    });
-    reset();
-    onClose();
+    // Convert slip file to base64 if provided
+    const saveSlip = async () => {
+      let slipImage: string | undefined;
+      if (slipFile) {
+        slipImage = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.readAsDataURL(slipFile);
+        });
+      }
+      addExpense({
+        description: desc,
+        amount: parseFloat(amount) || 0,
+        type,
+        category: category as CategoryType | undefined,
+        recipient,
+        accountId: accountId || undefined,
+        agentId: agentId || undefined,
+        expenseDate,
+        expenseTime,
+        isRecorded,
+        slipImage,
+      });
+      reset();
+      onClose();
+    };
+    saveSlip();
   };
 
   return (

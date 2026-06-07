@@ -183,6 +183,50 @@ export const analyticsRouter = {
     }),
 
   /**
+   * Get daily chart data for last N days (deposits, USDT, fee, profit)
+   */
+  getDailyChart: protectedProcedure
+    .input(z.object({ days: z.number().int().min(1).max(30).default(7) }))
+    .query(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) throw new Error('Database connection failed');
+      const userId = ctx.user.id;
+
+      const result: Array<{ date: string; deposits: number; usdt: number; fee: number; profit: number }> = [];
+      const MONTHS = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+
+      for (let i = input.days - 1; i >= 0; i--) {
+        const day = new Date();
+        day.setDate(day.getDate() - i);
+        day.setHours(0, 0, 0, 0);
+        const nextDay = new Date(day);
+        nextDay.setDate(nextDay.getDate() + 1);
+
+        const [deps, usdts, profits] = await Promise.all([
+          db.select().from(depositSlips).where(
+            and(eq(depositSlips.userId, userId), gte(depositSlips.slipDate, day), lte(depositSlips.slipDate, nextDay), eq(depositSlips.status, 'verified'))
+          ),
+          db.select().from(usdtUploads).where(
+            and(eq(usdtUploads.userId, userId), gte(usdtUploads.uploadDate, day), lte(usdtUploads.uploadDate, nextDay))
+          ),
+          db.select().from(profitRecords).where(
+            and(eq(profitRecords.userId, userId), gte(profitRecords.recordDate, day), lte(profitRecords.recordDate, nextDay))
+          ),
+        ]);
+
+        const totalDep = deps.reduce((s, d) => s + parseFloat(d.amount.toString()), 0);
+        const totalUsdt = usdts.reduce((s, u) => s + parseFloat(u.usdtAmount.toString()), 0);
+        const totalFee = usdts.reduce((s, u) => s + parseFloat(u.thbEquivalent.toString()), 0);
+        const totalProfit = profits.reduce((s, p) => s + parseFloat(p.profitThb.toString()), 0);
+
+        const label = `${day.getDate().toString().padStart(2, '0')} ${MONTHS[day.getMonth()]}`;
+        result.push({ date: label, deposits: totalDep, usdt: totalUsdt, fee: totalFee, profit: totalProfit });
+      }
+
+      return result;
+    }),
+
+  /**
    * Get summary dashboard data (deposits + USDT + profit today)
    */
   getSummaryToday: protectedProcedure.query(async ({ ctx }) => {

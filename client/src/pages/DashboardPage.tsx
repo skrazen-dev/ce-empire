@@ -1,28 +1,18 @@
-import { CreditCard, TrendingUp, TrendingDown, Receipt, Activity, DollarSign, Zap, BarChart3, CheckCircle2 } from 'lucide-react';
+import { CreditCard, TrendingUp, TrendingDown, Receipt, DollarSign, Zap, BarChart3, CheckCircle2 } from 'lucide-react';
 import { useStore } from '@/lib/store';
 import { money } from '@/lib/format';
 import PinnedAccountsWidget from '@/components/PinnedAccountsWidget';
 import { trpc } from '@/lib/trpc';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useMemo } from 'react';
 
 const HERO_BG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663690140697/LEwiJDTkxh7Zpu9QQSN3Ab/ce-empire-dashboard-hero-EsRJuHYLV27xj9LXu6NAhm.webp';
 
-const DAILY_DEPOSITS = [
-  { date: '01', amount: 25000 }, { date: '02', amount: 32500 }, { date: '03', amount: 18900 },
-  { date: '04', amount: 45200 }, { date: '05', amount: 38700 }, { date: '06', amount: 52100 }, { date: '07', amount: 41300 },
-];
-const DAILY_USDT = [
-  { date: '01', amount: 850 }, { date: '02', amount: 1200 }, { date: '03', amount: 950 },
-  { date: '04', amount: 1650 }, { date: '05', amount: 1400 }, { date: '06', amount: 1850 }, { date: '07', amount: 1550 },
-];
-const DAILY_FEE = [
-  { date: '01', amount: 1200 }, { date: '02', amount: 1850 }, { date: '03', amount: 980 },
-  { date: '04', amount: 2400 }, { date: '05', amount: 1750 }, { date: '06', amount: 2900 }, { date: '07', amount: 2100 },
-];
-const DAILY_PROFIT = [
-  { date: '01', profit: 5200 }, { date: '02', profit: 7800 }, { date: '03', profit: 4100 },
-  { date: '04', profit: 12300 }, { date: '05', profit: 9500 }, { date: '06', profit: 15600 }, { date: '07', profit: 11200 },
-];
+// Fallback static data (shown when no real data yet)
+const FALLBACK_CHART = Array.from({ length: 7 }, (_, i) => ({
+  date: `0${i + 1}`,
+  deposits: 0, usdt: 0, fee: 0, profit: 0,
+}));
 
 // Mini sparkline bar chart
 function MiniBarChart({ data, color, valueKey = 'amount' }: { data: any[]; color: string; valueKey?: string }) {
@@ -50,6 +40,8 @@ function MiniBarChart({ data, color, valueKey = 'amount' }: { data: any[]; color
 export default function DashboardPage() {
   const { accounts, expenses } = useStore();
   const { data: summary, isLoading } = trpc.analytics.getSummaryToday.useQuery();
+  const { data: chartData } = trpc.analytics.getDailyChart.useQuery({ days: 7 });
+  const chart = chartData ?? FALLBACK_CHART;
 
   const totalAccounts = accounts.length;
   const totalPaid = accounts.reduce((s, a) => s + a.paidAmount, 0);
@@ -66,16 +58,22 @@ export default function DashboardPage() {
   const limit500k = accounts.filter(a => a.creditLimit === '500k').length;
 
   // Big 4 headline metrics
-  const depositTotal = summary?.deposits.total ?? DAILY_DEPOSITS.reduce((s, d) => s + d.amount, 0);
-  const usdtTotal = summary?.usdt.total ?? DAILY_USDT.reduce((s, d) => s + d.amount, 0);
-  const feeTotal = summary?.usdt.totalTHB ?? DAILY_FEE.reduce((s, d) => s + d.amount, 0);
-  const profitTotal = summary?.profit.total ?? DAILY_PROFIT.reduce((s, d) => s + d.profit, 0);
+  const depositTotal = summary?.deposits.total ?? chart.reduce((s, d) => s + d.deposits, 0);
+  const usdtTotal = summary?.usdt.total ?? chart.reduce((s, d) => s + d.usdt, 0);
+  const feeTotal = summary?.usdt.totalTHB ?? chart.reduce((s, d) => s + d.fee, 0);
+  const profitTotal = summary?.profit.total ?? chart.reduce((s, d) => s + d.profit, 0);
+
+  // Transform chart data for each metric
+  const depData = chart.map(d => ({ date: d.date, amount: d.deposits }));
+  const usdtData = chart.map(d => ({ date: d.date, amount: d.usdt }));
+  const feeData = chart.map(d => ({ date: d.date, amount: d.fee }));
+  const profData = chart.map(d => ({ date: d.date, profit: d.profit }));
 
   const BIG_METRICS = [
-    { label: 'ยอดฝาก', value: depositTotal, unit: '฿', icon: DollarSign, color: '#00D9FF', glow: 'rgba(0,217,255,0.35)', data: DAILY_DEPOSITS, valueKey: 'amount' },
-    { label: 'ยอด USDT', value: usdtTotal, unit: 'USDT', icon: Zap, color: '#FF8C42', glow: 'rgba(255,140,66,0.35)', data: DAILY_USDT, valueKey: 'amount' },
-    { label: 'ค่าธรรมเนียม', value: feeTotal, unit: '฿', icon: BarChart3, color: '#EC4899', glow: 'rgba(236,72,153,0.35)', data: DAILY_FEE, valueKey: 'amount' },
-    { label: 'กำไร', value: profitTotal, unit: '฿', icon: TrendingUp, color: '#10B981', glow: 'rgba(16,185,129,0.35)', data: DAILY_PROFIT, valueKey: 'profit' },
+    { label: 'ยอดฝาก', value: depositTotal, unit: '฿', icon: DollarSign, color: '#00D9FF', glow: 'rgba(0,217,255,0.35)', data: depData, valueKey: 'amount' },
+    { label: 'ยอด USDT', value: usdtTotal, unit: 'USDT', icon: Zap, color: '#FF8C42', glow: 'rgba(255,140,66,0.35)', data: usdtData, valueKey: 'amount' },
+    { label: 'ค่าธรรมเนียม', value: feeTotal, unit: '฿', icon: BarChart3, color: '#EC4899', glow: 'rgba(236,72,153,0.35)', data: feeData, valueKey: 'amount' },
+    { label: 'กำไร', value: profitTotal, unit: '฿', icon: TrendingUp, color: '#10B981', glow: 'rgba(16,185,129,0.35)', data: profData, valueKey: 'profit' },
   ];
 
   return (
