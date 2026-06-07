@@ -48,11 +48,11 @@ export default function DashboardPage() {
   const totalDue = accounts.reduce((s, a) => s + a.dueAmount, 0);
   const totalExpenses = expenses.reduce((s, e) => s + e.amount, 0);
 
-  // Account status stats
-  const skrillCount = accounts.filter(a => a.accountType === 'skrill').length;
-  const netellerCount = accounts.filter(a => a.accountType === 'neteller').length;
-  const bigpayCount = accounts.filter(a => a.accountType === 'bigpay').length;
-  const completeCount = accounts.filter(a => a.accountType === 'complete').length;
+  // Account status stats (accountType is now an array)
+  const skrillCount = accounts.filter(a => a.accountType?.includes('skrill')).length;
+  const netellerCount = accounts.filter(a => a.accountType?.includes('neteller')).length;
+  const bigpayCount = accounts.filter(a => a.accountType?.includes('bigpay')).length;
+  const completeCount = accounts.filter(a => a.accountType?.includes('complete')).length;
   const limit50k = accounts.filter(a => a.creditLimit === '50k').length;
   const limit200k = accounts.filter(a => a.creditLimit === '200k').length;
   const limit500k = accounts.filter(a => a.creditLimit === '500k').length;

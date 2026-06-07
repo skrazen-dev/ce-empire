@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Plus, Search, Trash2, Eye, EyeOff, Copy, Check } from 'lucide-react';
+import { Plus, Search, Trash2, Eye, EyeOff, Copy, Check, CreditCard, TrendingUp, AlertCircle, Wallet } from 'lucide-react';
+import { toast } from 'sonner';  
 import { useStore } from '@/lib/store';
 import { getBankByCode, BANKS } from '@/lib/banks';
 import { money, maskAccountNo } from '@/lib/format';
@@ -25,13 +26,21 @@ export default function AccountsPage() {
   };
 
   const copyToClipboard = (text: string, fieldId: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedField(fieldId);
-    setTimeout(() => setCopiedField(null), 2000);
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedField(fieldId);
+      toast.success('คัดลอกแล้ว', { duration: 1200 });
+      setTimeout(() => setCopiedField(null), 2000);
+    });
   };
+
+  // Quick Stats
+  const totalPaid = accounts.reduce((s, a) => s + a.paidAmount, 0);
+  const totalDue = accounts.reduce((s, a) => s + a.dueAmount, 0);
+  const totalBalance = totalPaid + totalDue;
 
   return (
     <div className="animate-fade-up space-y-4">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-bold text-white">บัญชีทั้งหมด</h2>
@@ -42,14 +51,57 @@ export default function AccountsPage() {
         </Button>
       </div>
 
+      {/* Quick Stats Cards */}
+      {accounts.length > 0 && (
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <div className="rounded-xl p-3 border" style={{ background: 'linear-gradient(135deg, rgba(0,212,255,0.08) 0%, rgba(0,212,255,0.04) 100%)', borderColor: 'rgba(0,212,255,0.18)' }}>
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <CreditCard size={12} className="text-[#00D4FF]" />
+              <span className="text-[10px] text-slate-400">บัญชีทั้งหมด</span>
+            </div>
+            <p className="text-xl font-bold text-[#00D4FF]">{accounts.length}</p>
+            <p className="text-[9px] text-slate-500">บัญชี</p>
+          </div>
+          <div className="rounded-xl p-3 border" style={{ background: 'linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(16,185,129,0.04) 100%)', borderColor: 'rgba(16,185,129,0.18)' }}>
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <TrendingUp size={12} className="text-emerald-400" />
+              <span className="text-[10px] text-slate-400">จ่ายแล้ว</span>
+            </div>
+            <p className="text-xl font-bold text-emerald-400">฿{money(totalPaid)}</p>
+            <p className="text-[9px] text-slate-500">ยอดรวม</p>
+          </div>
+          <div className="rounded-xl p-3 border" style={{ background: 'linear-gradient(135deg, rgba(239,68,68,0.08) 0%, rgba(239,68,68,0.04) 100%)', borderColor: 'rgba(239,68,68,0.18)' }}>
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <AlertCircle size={12} className="text-red-400" />
+              <span className="text-[10px] text-slate-400">ค้างจ่าย</span>
+            </div>
+            <p className="text-xl font-bold text-red-400">฿{money(totalDue)}</p>
+            <p className="text-[9px] text-slate-500">ยอดรวม</p>
+          </div>
+          <div className="rounded-xl p-3 border" style={{ background: 'linear-gradient(135deg, rgba(255,140,66,0.08) 0%, rgba(255,140,66,0.04) 100%)', borderColor: 'rgba(255,140,66,0.18)' }}>
+            <div className="flex items-center gap-1.5 mb-1.5">
+              <Wallet size={12} className="text-[#FF8C42]" />
+              <span className="text-[10px] text-slate-400">ยอดรวม</span>
+            </div>
+            <p className="text-xl font-bold text-[#FF8C42]">฿{money(totalBalance)}</p>
+            <p className="text-[9px] text-slate-500">จ่าย+ค้าง</p>
+          </div>
+        </div>
+      )}
+
       {accounts.length === 0 ? (
-        <Card className="bg-[#1A1F26] border-[rgba(255,255,255,0.06)]">
-          <CardContent className="flex flex-col items-center justify-center py-16">
-            <Search size={36} className="text-[#A0A0A0]/30 mb-3" />
-            <p className="text-sm text-[#A0A0A0]">ยังไม่มีบัญชี</p>
-            <p className="text-xs text-[#A0A0A0]/60 mt-1">กดปุ่ม "เพิ่มบัญชี" เพื่อเริ่มต้น</p>
-          </CardContent>
-        </Card>
+        <div className="rounded-2xl border border-dashed border-[rgba(255,140,66,0.2)] bg-[#1A1F26]/60 flex flex-col items-center justify-center py-16 gap-3">
+          <div className="w-16 h-16 rounded-2xl bg-[#FF8C42]/10 flex items-center justify-center">
+            <CreditCard size={28} className="text-[#FF8C42]/60" />
+          </div>
+          <div className="text-center">
+            <p className="text-sm font-semibold text-white">ยังไม่มีบัญชี</p>
+            <p className="text-xs text-[#A0A0A0] mt-1">เพิ่มบัญชีแรกเพื่อเริ่มต้นใช้งาน</p>
+          </div>
+          <Button onClick={() => setShowForm(true)} size="sm" className="bg-[#FF8C42] hover:bg-[#E67E2F] text-white text-xs gap-1.5">
+            <Plus size={12} /> เพิ่มบัญชีแรก
+          </Button>
+        </div>
       ) : (
         <div className="space-y-3">
           {accounts.map((acc) => {
@@ -104,18 +156,24 @@ export default function AccountsPage() {
                     <p className="text-[10px] font-bold text-[#FF8C42] uppercase tracking-widest">สถานะบัญชี</p>
 
                     {/* Account Type & Credit Limit */}
-                    {(acc.accountType || acc.creditLimit) && (
-                      <div className="grid grid-cols-2 gap-2 mb-2">
-                        {acc.accountType && (
-                          <div className="px-2 py-1.5 rounded-lg bg-[#FF8C42]/10 border border-[#FF8C42]/20">
-                            <p className="text-[9px] text-[#A0A0A0]">ประเภท</p>
-                            <p className="text-xs font-semibold text-[#FF8C42]">{acc.accountType === 'complete' ? 'แอคตัดครบ' : acc.accountType?.toUpperCase()}</p>
+                    {((acc.accountType && acc.accountType.length > 0) || acc.creditLimit) && (
+                      <div className="space-y-1.5 mb-2">
+                        {acc.accountType && acc.accountType.length > 0 && (
+                          <div>
+                            <p className="text-[9px] text-[#A0A0A0] mb-1">ประเภท</p>
+                            <div className="flex flex-wrap gap-1">
+                              {acc.accountType.map((t) => (
+                                <span key={t} className="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-[#FF8C42]/20 border border-[#FF8C42]/40 text-[#FF8C42]">
+                                  {t === 'complete' ? 'แอคตัดครบ' : t.toUpperCase()}
+                                </span>
+                              ))}
+                            </div>
                           </div>
                         )}
                         {acc.creditLimit && (
-                          <div className="px-2 py-1.5 rounded-lg bg-[#FF8C42]/10 border border-[#FF8C42]/20">
-                            <p className="text-[9px] text-[#A0A0A0]">วงเงิน</p>
-                            <p className="text-xs font-semibold text-[#FF8C42]">{acc.creditLimit}</p>
+                          <div className="flex items-center gap-1.5">
+                            <p className="text-[9px] text-[#A0A0A0]">วงเงิน:</p>
+                            <span className="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-emerald-500/20 border border-emerald-500/40 text-emerald-400">{acc.creditLimit}</span>
                           </div>
                         )}
                       </div>
@@ -293,7 +351,7 @@ function AccountFormDialog({ open, onClose }: { open: boolean; onClose: () => vo
   const [cardExpiryDate, setCardExpiryDate] = useState('');
   const [accountEmail, setAccountEmail] = useState('');
   const [accountPassword, setAccountPassword] = useState('');
-  const [accountType, setAccountType] = useState<'complete' | 'skrill' | 'neteller' | 'bigpay' | ''>('');
+  const [accountTypes, setAccountTypes] = useState<('complete' | 'skrill' | 'neteller' | 'bigpay')[]>([]);  
   const [creditLimit, setCreditLimit] = useState<'50k' | '200k' | '500k' | ''>('');
 
   const reset = () => {
@@ -303,7 +361,7 @@ function AccountFormDialog({ open, onClose }: { open: boolean; onClose: () => vo
     setProfilePhoto(null); setIdCardNumber(''); setIdCardPhoto(null);
     setDateOfBirth(''); setVirtualCardNumber(''); setCardCVV('');
     setCardExpiryDate(''); setAccountEmail(''); setAccountPassword('');
-    setAccountType(''); setCreditLimit('');
+    setAccountTypes([]); setCreditLimit('');
   };
 
   const handleSubmit = () => {
@@ -317,7 +375,7 @@ function AccountFormDialog({ open, onClose }: { open: boolean; onClose: () => vo
       pin,
       paidAmount: parseFloat(paid) || 0,
       dueAmount: parseFloat(due) || 0,
-      accountType: accountType as any,
+      accountType: accountTypes.length > 0 ? accountTypes : undefined,
       creditLimit: creditLimit as any,
     });
     reset();
@@ -400,21 +458,28 @@ function AccountFormDialog({ open, onClose }: { open: boolean; onClose: () => vo
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label className="text-[#A0A0A0] mb-2 block">ประเภทบัญชี</Label>
+              <Label className="text-[#A0A0A0] mb-2 block">ประเภทบัญชี <span className="text-[10px] text-slate-500">(เลือกได้หลาย)</span></Label>
               <div className="grid grid-cols-2 gap-2">
-                {['complete', 'skrill', 'neteller', 'bigpay'].map((type) => (
-                  <button
-                    key={type}
-                    onClick={() => setAccountType(type as any)}
-                    className={`px-3 py-2 rounded-lg text-xs font-medium transition-all ${
-                      accountType === type
-                        ? 'bg-[#FF8C42] text-white border-[#FF8C42]'
-                        : 'bg-[#242B33] border border-[rgba(255,255,255,0.08)] text-[#A0A0A0] hover:border-[#FF8C42]/30'
-                    }`}
-                  >
-                    {type === 'complete' ? 'แอคตัดครบ' : type.toUpperCase()}
-                  </button>
-                ))}</div>
+                {(['complete', 'skrill', 'neteller', 'bigpay'] as const).map((type) => {
+                  const isSelected = accountTypes.includes(type);
+                  return (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setAccountTypes(prev =>
+                        isSelected ? prev.filter(t => t !== type) : [...prev, type]
+                      )}
+                      className={`px-3 py-2 rounded-lg text-xs font-medium transition-all flex items-center justify-center gap-1.5 ${
+                        isSelected
+                          ? 'bg-[#FF8C42] text-white ring-2 ring-[#FF8C42]/40'
+                          : 'bg-[#242B33] border border-[rgba(255,255,255,0.08)] text-[#A0A0A0] hover:border-[#FF8C42]/30'
+                      }`}
+                    >
+                      {isSelected && <span className="text-[10px]">✓</span>}
+                      {type === 'complete' ? 'แอคตัดครบ' : type.toUpperCase()}
+                    </button>
+                  );
+                })}</div>
             </div>
             <div>
               <Label className="text-[#A0A0A0] mb-2 block">วงเงิน</Label>

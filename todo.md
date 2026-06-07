@@ -94,3 +94,14 @@
 - [x] ExpensesPage: Category filter chips ทำงานได้จริง
 - [x] ExpensesPage: Slip image ถูก save ตอน submit
 - [x] ProofPage: ปุ่มอัปโหลดทำงานได้จริง + lightbox viewer + download
+
+## Phase 1 - Bug Fixes + Premium UI
+- [x] แก้ Dropdown "เลือกบัญชีธนาคาร" ใน PinnedAccounts ให้ดึงข้อมูลจริง (fallback จาก local store)
+- [x] เปลี่ยน "ประเภทบัญชี" เป็น Multi-select Chips (เลือกได้หลายตัว)
+- [x] แก้ Text overflow ทั้งแอป (truncate, line-clamp)
+- [x] แก้เมนูบัญชีแสดงผลดีขึ้น (card layout, spacing)
+- [x] เพิ่ม Quick Stats Cards ใน Accounts page (4 cards: บัญชี/จ่าย/ค้าง/รวม)
+- [x] ปรับ Bottom Navigation ใหม่: 5 primary tabs + More drawer
+- [x] เพิ่ม Toast Notification สวยเมื่อคัดลอก/บันทึก
+- [x] ปรับ Empty State ให้ดีขึ้น (icon + CTA button)
+- [x] ทดสอบ mobile responsive ทุกหน้า + Tests 24/24 pass

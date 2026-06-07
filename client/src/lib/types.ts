@@ -8,7 +8,7 @@ export interface BankAccount {
   pin: string;
   paidAmount: number;
   dueAmount: number;
-  accountType?: 'complete' | 'skrill' | 'neteller' | 'bigpay';
+  accountType?: ('complete' | 'skrill' | 'neteller' | 'bigpay')[];
   accountStatus?: string;
   creditLimit?: '50k' | '200k' | '500k';
   idCardNumber?: string;

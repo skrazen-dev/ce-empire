@@ -98,12 +98,24 @@ function AddPinDialog({
   onClose: () => void;
   onSuccess: () => void;
 }) {
-  const { settings } = useStore();
+  const { settings, accounts: localAccounts } = useStore();
   const [accountId, setAccountId] = useState("");
   const [telegramGroup, setTelegramGroup] = useState("");
   const [note, setNote] = useState("");
 
   const accountsQuery = trpc.accounts.list.useQuery(undefined, { enabled: open });
+  // Merge backend accounts + local store accounts (deduplicate by accountNo)
+  const mergedAccounts = useMemo(() => {
+    const backendAccs = accountsQuery.data ?? [];
+    if (backendAccs.length > 0) return backendAccs;
+    // Fallback: use local store accounts formatted to match expected shape
+    return localAccounts.map(a => ({
+      id: parseInt(a.id.replace(/[^0-9]/g, '').slice(0, 8) || '0', 10) || Math.abs(a.id.split('').reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 0)),
+      bankName: a.bankCode,
+      accountName: `${a.firstName} ${a.lastName}`.trim() || a.accountNo,
+      accountNumber: a.accountNo,
+    }));
+  }, [accountsQuery.data, localAccounts]);
   const pinMutation = trpc.pinned.pin.useMutation({
     onSuccess: () => {
       playSoundIf(settings.soundEnabled, playPinSound);
@@ -142,11 +154,17 @@ function AddPinDialog({
                 <SelectValue placeholder="เลือกบัญชีธนาคาร..." />
               </SelectTrigger>
               <SelectContent className="bg-[#1E293B] border-[rgba(148,163,184,0.12)]">
-                {accountsQuery.data?.map((acc) => (
-                  <SelectItem key={acc.id} value={String(acc.id)} className="text-white">
+                {mergedAccounts.length === 0 && (
+                  <div className="px-3 py-4 text-center text-xs text-slate-500">
+                    ยังไม่มีบัญชี — กรุณาเพิ่มบัญชีก่อน
+                  </div>
+                )}
+                {mergedAccounts.map((acc) => (
+                  <SelectItem key={acc.id} value={String(acc.id)} className="text-white hover:bg-slate-700">
                     <span className="flex items-center gap-2">
-                      <span className="text-xs font-medium">{acc.bankName}</span>
+                      <span className="text-xs font-medium text-white">{acc.bankName}</span>
                       <span className="text-slate-400 text-xs">{acc.accountName}</span>
+                      {acc.accountNumber && <span className="text-slate-500 text-[10px] font-mono">{acc.accountNumber.slice(-4)}</span>}
                     </span>
                   </SelectItem>
                 ))}
