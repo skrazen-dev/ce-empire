@@ -40,7 +40,7 @@ export default function AgentsPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {agents.map((agent) => {
             const agentExpenses = expenses.filter((e) => e.agentId === agent.id);
             const totalAmount = agentExpenses.reduce((s, e) => s + e.amount, 0);

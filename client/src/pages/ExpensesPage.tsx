@@ -102,8 +102,9 @@ function ExpenseFormDialog({ open, onClose }: { open: boolean; onClose: () => vo
   const [type, setType] = useState<'paid' | 'pending'>('pending');
   const [accountId, setAccountId] = useState('');
   const [agentId, setAgentId] = useState('');
+  const [slipFile, setSlipFile] = useState<File | null>(null);
 
-  const reset = () => { setDesc(''); setAmount(''); setType('pending'); setAccountId(''); setAgentId(''); };
+  const reset = () => { setDesc(''); setAmount(''); setType('pending'); setAccountId(''); setAgentId(''); setSlipFile(null); };
 
   const handleSubmit = () => {
     if (!desc || !amount) return;
@@ -170,6 +171,11 @@ function ExpenseFormDialog({ open, onClose }: { open: boolean; onClose: () => vo
               </Select>
             </div>
           )}
+          <div>
+            <Label htmlFor="slip" className="text-[#A0A0A0]">สลิปเงิน (ไม่บังคับ)</Label>
+            <Input id="slip" type="file" accept="image/*" onChange={(e) => setSlipFile(e.target.files?.[0] || null)} className="bg-[#242B33] border-[rgba(255,255,255,0.08)] text-white" />
+            {slipFile && <p className="text-xs text-[#00D4FF] mt-1">✓ {slipFile.name}</p>}
+          </div>
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="outline" onClick={() => { reset(); onClose(); }} className="border-[rgba(255,255,255,0.08)] text-[#A0A0A0]">ยกเลิก</Button>
             <Button onClick={handleSubmit} disabled={!desc || !amount} className="bg-[#00D4FF] hover:bg-[#0099CC] text-[#0F1419] font-semibold">เพิ่มรายการ</Button>

@@ -3,7 +3,8 @@ import { useStore } from '@/lib/store';
 import { money } from '@/lib/format';
 import { Card, CardContent } from '@/components/ui/card';
 import PinnedAccountsWidget from '@/components/PinnedAccountsWidget';
-import GrokChatPanel from '@/components/GrokChatPanel';
+import { SummaryStatsCard } from '@/components/SummaryStatsCard';
+
 
 const HERO_BG = 'https://d2xsxph8kpxj0f.cloudfront.net/310519663690140697/LEwiJDTkxh7Zpu9QQSN3Ab/ce-empire-dashboard-hero-EsRJuHYLV27xj9LXu6NAhm.webp';
 
@@ -132,14 +133,14 @@ export default function DashboardPage() {
         })}
       </section>
 
-      {/* ── Pinned Accounts Widget + Grok Chat ── */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-4 animate-fade-up delay-200">
-        <div className="lg:col-span-2">
-          <PinnedAccountsWidget />
-        </div>
-        <div className="lg:col-span-1">
-          <GrokChatPanel />
-        </div>
+      {/* ── Summary Stats ── */}
+      <section className="animate-fade-up delay-100">
+        <SummaryStatsCard />
+      </section>
+
+      {/* ── Pinned Accounts Widget ── */}
+      <section className="animate-fade-up delay-200">
+        <PinnedAccountsWidget />
       </section>
 
       {/* ── Bar Chart - Monthly Expenses ── */}

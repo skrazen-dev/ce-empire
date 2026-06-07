@@ -8,6 +8,7 @@ import { pinnedRouter } from "./routers/pinned";
 import { grokRouter } from "./routers/grok";
 import { tasksRouter } from "./routers/tasks";
 import { teamRouter } from "./routers/team";
+import { analyticsRouter } from "./routers/analytics";
 import {
   clearUsdtCalculations,
   createAccount,
@@ -236,6 +237,7 @@ export const appRouter = router({
   grok: grokRouter,
   tasks: tasksRouter,
   team: teamRouter,
+  analytics: analyticsRouter,
 });
 
 export type AppRouter = typeof appRouter;

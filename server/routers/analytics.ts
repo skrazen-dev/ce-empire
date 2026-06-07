@@ -186,7 +186,8 @@ export const analyticsRouter = {
    * Get summary dashboard data (deposits + USDT + profit today)
    */
   getSummaryToday: protectedProcedure.query(async ({ ctx }) => {
-    const db = getDb();
+    const db = await getDb();
+    if (!db) throw new Error('Database connection failed');
     const userId = ctx.user.id;
 
     const today = new Date();
@@ -207,7 +208,7 @@ export const analyticsRouter = {
         )
       );
 
-    const totalDeposits = depositsData.reduce((sum, d) => sum + parseFloat(d.amount.toString()), 0);
+    const totalDeposits = depositsData.reduce((sum: number, d: any) => sum + parseFloat(d.amount.toString()), 0);
 
     // Get USDT
     const usdtData = await db
@@ -221,8 +222,8 @@ export const analyticsRouter = {
         )
       );
 
-    const totalUSDT = usdtData.reduce((sum, u) => sum + parseFloat(u.usdtAmount.toString()), 0);
-    const totalUSDTTHB = usdtData.reduce((sum, u) => sum + parseFloat(u.thbEquivalent.toString()), 0);
+    const totalUSDT = usdtData.reduce((sum: number, u: any) => sum + parseFloat(u.usdtAmount.toString()), 0);
+    const totalUSDTTHB = usdtData.reduce((sum: number, u: any) => sum + parseFloat(u.thbEquivalent.toString()), 0);
 
     // Get profit
     const profitData = await db
@@ -236,7 +237,7 @@ export const analyticsRouter = {
         )
       );
 
-    const totalProfit = profitData.reduce((sum, p) => sum + parseFloat(p.profitThb.toString()), 0);
+    const totalProfit = profitData.reduce((sum: number, p: any) => sum + parseFloat(p.profitThb.toString()), 0);
 
     return {
       deposits: {

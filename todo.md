@@ -26,3 +26,11 @@
 - [ ] อัปเดต Backend: accounts router + DB helpers + file upload
 - [ ] เพิ่ม encryption สำหรับ sensitive data (card number, CVV, password)
 - [ ] ทดสอบ + Checkpoint
+
+## UI Refinement
+- [x] ปรับแตง SummaryStatsCard: แสดงทั้งหมด + Edit/Copy buttons
+- [x] ปรับแตง Agent cards: เพิ่มความกว้าง
+- [x] เพิ่ม Slip upload ใน Expenses page
+- [x] ลบ Grok chat เอาฟีเจอร์ที่มีประโยชน์มากกว่า
+- [x] เชื่อ SummaryStatsCard ใน Dashboard
+- [x] เชื่อ Slip upload backend
