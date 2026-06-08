@@ -20,25 +20,27 @@ import RiskAnalysisPage from "@/pages/RiskAnalysisPage";
 import TasksPage from "@/pages/TasksPage";
 
 import LoadingScreen from "@/components/LoadingScreen";
+import { PageTransition } from "@/components/PageTransition";
 import { useState } from "react";
 
 function PageRenderer() {
   const { currentPage } = useStore();
+  let content: React.ReactNode;
   switch (currentPage) {
-    case 'dashboard': return <DashboardPage />;
-    case 'accounts': return <AccountsPage />;
-    case 'expenses': return <ExpensesPage />;
-    case 'agents': return <AgentsPage />;
-    case 'status': return <StatusPage />;
-    case 'proof': return <ProofPage />;
-    case 'usdt-calc': return <UsdtCalcPage />;
-    case 'bulk-calc': return <BulkCalcPage />;
-    case 'risk-analysis': return <RiskAnalysisPage />;
-    case 'tasks': return <TasksPage />;
-
-    case 'settings': return <SettingsPage />;
-    default: return <DashboardPage />;
+    case 'dashboard': content = <DashboardPage />; break;
+    case 'accounts': content = <AccountsPage />; break;
+    case 'expenses': content = <ExpensesPage />; break;
+    case 'agents': content = <AgentsPage />; break;
+    case 'status': content = <StatusPage />; break;
+    case 'proof': content = <ProofPage />; break;
+    case 'usdt-calc': content = <UsdtCalcPage />; break;
+    case 'bulk-calc': content = <BulkCalcPage />; break;
+    case 'risk-analysis': content = <RiskAnalysisPage />; break;
+    case 'tasks': content = <TasksPage />; break;
+    case 'settings': content = <SettingsPage />; break;
+    default: content = <DashboardPage />;
   }
+  return <PageTransition pageKey={currentPage}>{content}</PageTransition>;
 }
 function AppLayout() {
   // make sure to consider if you need authentication for certain routes
