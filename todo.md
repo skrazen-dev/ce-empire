@@ -124,3 +124,13 @@
 
 ## Grok Code Generation Backend
 - [x] สร้าง backend: grok.generateCode procedure ใน server/routers/grok.ts - สำหรับแก้ bugs, optimize, explain, convert code
+
+## Phase 3 - Supabase Integration
+- [x] สร้าง SQL migration script สำหรับ Supabase (10 tables)
+- [x] ติดตั้ง @supabase/supabase-js + เพิ่ม SUPABASE_SERVICE_ROLE_KEY secret
+- [x] สร้าง server/supabase.ts - Supabase admin client
+- [x] สร้าง server/db-supabase.ts - query helpers พร้อม snake_case→camelCase mappers
+- [x] ปรับ server/routers.ts ให้ใช้ Supabase helpers แทน Drizzle/TiDB
+- [x] ปรับ server/_core/oauth.ts ให้ upsert user ไป Supabase
+- [x] แก้ index.css build error (Missing opening {)
+- [x] Tests: 29/29 passed

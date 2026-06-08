@@ -10,29 +10,29 @@ import { tasksRouter } from "./routers/tasks";
 import { teamRouter } from "./routers/team";
 import { analyticsRouter } from "./routers/analytics";
 import {
-  clearUsdtCalculations,
-  createAccount,
-  createAgent,
-  createExpense,
-  createUsdtCalculation,
-  deleteAccount,
-  deleteAgent,
-  deleteExpense,
-  deleteUsdtCalculation,
-  getAccounts,
-  getAgents,
-  getExpenses,
-  getSettings,
-  getUsdtCalculations,
-  updateAccount,
-  updateAgent,
-  updateExpense,
-  upsertSettings,
-} from "./db";
+  getAccountsSb,
+  createAccountSb,
+  updateAccountSb,
+  deleteAccountSb,
+  getAgentsSb,
+  createAgentSb,
+  updateAgentSb,
+  deleteAgentSb,
+  getExpensesSb,
+  createExpenseSb,
+  updateExpenseSb,
+  deleteExpenseSb,
+  getUsdtCalculationsSb,
+  createUsdtCalculationSb,
+  deleteUsdtCalculationSb,
+  clearUsdtCalculationsSb,
+  getSettingsSb,
+  upsertSettingsSb,
+} from "./db-supabase";
 
 // ─── Accounts Router ──────────────────────────────────────────────────────────
 const accountsRouter = router({
-  list: protectedProcedure.query(({ ctx }) => getAccounts(ctx.user.id)),
+  list: protectedProcedure.query(({ ctx }) => getAccountsSb(ctx.user.id)),
 
   create: protectedProcedure
     .input(
@@ -47,7 +47,7 @@ const accountsRouter = router({
       })
     )
     .mutation(({ ctx, input }) =>
-      createAccount({ userId: ctx.user.id, ...input })
+      createAccountSb({ userId: ctx.user.id, ...input })
     ),
 
   update: protectedProcedure
@@ -61,21 +61,33 @@ const accountsRouter = router({
         balance: z.string().optional(),
         note: z.string().optional().nullable(),
         isActive: z.enum(["yes", "no"]).optional(),
+        profilePhotoUrl: z.string().optional().nullable(),
+        idCardNumber: z.string().optional().nullable(),
+        idCardPhotoUrl: z.string().optional().nullable(),
+        dateOfBirth: z.date().optional().nullable(),
+        virtualCardNumber: z.string().optional().nullable(),
+        cardCvv: z.string().optional().nullable(),
+        cardExpiryDate: z.string().optional().nullable(),
+        accountEmail: z.string().optional().nullable(),
+        accountPassword: z.string().optional().nullable(),
+        accountType: z.string().optional().nullable(),
+        accountStatus: z.string().optional().nullable(),
+        creditLimit: z.string().optional().nullable(),
       })
     )
     .mutation(({ ctx, input }) => {
       const { id, ...data } = input;
-      return updateAccount(id, ctx.user.id, data);
+      return updateAccountSb(id, ctx.user.id, data);
     }),
 
   delete: protectedProcedure
     .input(z.object({ id: z.number().int().positive() }))
-    .mutation(({ ctx, input }) => deleteAccount(input.id, ctx.user.id)),
+    .mutation(({ ctx, input }) => deleteAccountSb(input.id, ctx.user.id)),
 });
 
 // ─── Agents Router ────────────────────────────────────────────────────────────
 const agentsRouter = router({
-  list: protectedProcedure.query(({ ctx }) => getAgents(ctx.user.id)),
+  list: protectedProcedure.query(({ ctx }) => getAgentsSb(ctx.user.id)),
 
   create: protectedProcedure
     .input(
@@ -88,7 +100,7 @@ const agentsRouter = router({
       })
     )
     .mutation(({ ctx, input }) =>
-      createAgent({ userId: ctx.user.id, ...input })
+      createAgentSb({ userId: ctx.user.id, ...input })
     ),
 
   update: protectedProcedure
@@ -100,21 +112,24 @@ const agentsRouter = router({
         lineId: z.string().optional().nullable(),
         note: z.string().optional().nullable(),
         isActive: z.enum(["yes", "no"]).optional(),
+        withdrawAmount: z.string().optional(),
+        pendingAmount: z.string().optional(),
+        startDate: z.date().optional().nullable(),
       })
     )
     .mutation(({ ctx, input }) => {
       const { id, ...data } = input;
-      return updateAgent(id, ctx.user.id, data);
+      return updateAgentSb(id, ctx.user.id, data);
     }),
 
   delete: protectedProcedure
     .input(z.object({ id: z.number().int().positive() }))
-    .mutation(({ ctx, input }) => deleteAgent(input.id, ctx.user.id)),
+    .mutation(({ ctx, input }) => deleteAgentSb(input.id, ctx.user.id)),
 });
 
 // ─── Expenses Router ──────────────────────────────────────────────────────────
 const expensesRouter = router({
-  list: protectedProcedure.query(({ ctx }) => getExpenses(ctx.user.id)),
+  list: protectedProcedure.query(({ ctx }) => getExpensesSb(ctx.user.id)),
 
   create: protectedProcedure
     .input(
@@ -133,7 +148,7 @@ const expensesRouter = router({
       })
     )
     .mutation(({ ctx, input }) =>
-      createExpense({ userId: ctx.user.id, ...input })
+      createExpenseSb({ userId: ctx.user.id, ...input })
     ),
 
   update: protectedProcedure
@@ -155,18 +170,18 @@ const expensesRouter = router({
     )
     .mutation(({ ctx, input }) => {
       const { id, ...data } = input;
-      return updateExpense(id, ctx.user.id, data);
+      return updateExpenseSb(id, ctx.user.id, data);
     }),
 
   delete: protectedProcedure
     .input(z.object({ id: z.number().int().positive() }))
-    .mutation(({ ctx, input }) => deleteExpense(input.id, ctx.user.id)),
+    .mutation(({ ctx, input }) => deleteExpenseSb(input.id, ctx.user.id)),
 });
 
 // ─── USDT Calculations Router ─────────────────────────────────────────────────
 const usdtCalcsRouter = router({
   list: protectedProcedure.query(({ ctx }) =>
-    getUsdtCalculations(ctx.user.id)
+    getUsdtCalculationsSb(ctx.user.id)
   ),
 
   create: protectedProcedure
@@ -184,23 +199,23 @@ const usdtCalcsRouter = router({
       })
     )
     .mutation(({ ctx, input }) =>
-      createUsdtCalculation({ userId: ctx.user.id, ...input })
+      createUsdtCalculationSb({ userId: ctx.user.id, ...input })
     ),
 
   delete: protectedProcedure
     .input(z.object({ id: z.number().int().positive() }))
     .mutation(({ ctx, input }) =>
-      deleteUsdtCalculation(input.id, ctx.user.id)
+      deleteUsdtCalculationSb(input.id, ctx.user.id)
     ),
 
   clear: protectedProcedure.mutation(({ ctx }) =>
-    clearUsdtCalculations(ctx.user.id)
+    clearUsdtCalculationsSb(ctx.user.id)
   ),
 });
 
 // ─── Settings Router ──────────────────────────────────────────────────────────
 const settingsRouter = router({
-  get: protectedProcedure.query(({ ctx }) => getSettings(ctx.user.id)),
+  get: protectedProcedure.query(({ ctx }) => getSettingsSb(ctx.user.id)),
 
   update: protectedProcedure
     .input(
@@ -212,7 +227,7 @@ const settingsRouter = router({
         soundEnabled: z.enum(["yes", "no"]).optional(),
       })
     )
-    .mutation(({ ctx, input }) => upsertSettings(ctx.user.id, input)),
+    .mutation(({ ctx, input }) => upsertSettingsSb(ctx.user.id, input)),
 });
 
 // ─── App Router ───────────────────────────────────────────────────────────────
