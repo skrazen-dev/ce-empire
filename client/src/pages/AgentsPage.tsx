@@ -50,13 +50,13 @@ export default function AgentsPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 stagger-children">
           {agents.map((agent) => {
             const agentExpenses = expenses.filter((e) => e.agentId === agent.id);
             const totalAmount = agentExpenses.reduce((s, e) => s + e.amount, 0);
             const linkedAccounts = useStore().accounts.filter((acc) => agentExpenses.some((e) => e.accountId === acc.id));
             return (
-              <Card key={agent.id} className="bg-[#1A1F26] border-[rgba(168,85,247,0.2)] group hover:border-[#A855F7]/40 transition-colors">
+              <Card key={agent.id} className="bg-[#1A1F26] border-[rgba(168,85,247,0.2)] group hover:border-[#A855F7]/40 transition-colors card-hover animate-fade-up">
                 <CardContent className="p-4">
                   {/* Header */}
                   <div className="flex items-center justify-between mb-3">

@@ -138,37 +138,7 @@ export function Sidebar() {
         ))}
       </nav>
 
-      {/* ── Grok AI button (neon cyan) ── */}
-      <div className="mt-auto pt-4">
-        <button
-          className="w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl transition-all duration-200 group"
-          style={{
-            background: 'linear-gradient(135deg, rgba(13,24,41,0.95) 0%, rgba(10,16,32,0.9) 100%)',
-            border: '1.5px solid rgba(0,212,255,0.35)',
-            boxShadow: '0 0 12px rgba(0,212,255,0.2), inset 0 1px 0 rgba(0,212,255,0.08)',
-          }}
-          onMouseEnter={e => {
-            (e.currentTarget as HTMLElement).style.boxShadow = '0 0 20px rgba(0,212,255,0.4), inset 0 1px 0 rgba(0,212,255,0.12)';
-            (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,212,255,0.6)';
-          }}
-          onMouseLeave={e => {
-            (e.currentTarget as HTMLElement).style.boxShadow = '0 0 12px rgba(0,212,255,0.2), inset 0 1px 0 rgba(0,212,255,0.08)';
-            (e.currentTarget as HTMLElement).style.borderColor = 'rgba(0,212,255,0.35)';
-          }}
-        >
-          <span
-            className="flex items-center justify-center w-7 h-7 rounded-lg shrink-0"
-            style={{ background: 'rgba(0,212,255,0.12)', boxShadow: '0 0 8px rgba(0,212,255,0.3)' }}
-          >
-            <Zap size={14} style={{ color: '#00D4FF' }} />
-          </span>
-          <span className="text-xs font-bold font-heading" style={{ color: '#00D4FF' }}>Grok AI</span>
-          <span
-            className="ml-auto w-1.5 h-1.5 rounded-full shrink-0"
-            style={{ background: '#00D4FF', boxShadow: '0 0 6px rgba(0,212,255,0.7)', animation: 'pulse-glow 2s ease-in-out infinite' }}
-          />
-        </button>
-      </div>
+
     </aside>
   );
 }

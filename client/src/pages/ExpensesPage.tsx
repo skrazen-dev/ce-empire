@@ -1,5 +1,7 @@
-import { useState } from 'react';
-import { Plus, Receipt, Filter, Check } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, Receipt, Filter, Check, Scan } from 'lucide-react';
+import { OCRSlipScanner } from '@/components/OCRSlipScanner';
+import type { SlipData } from '@/hooks/useOCR';
 import { useStore } from '@/lib/store';
 import { money, formatDate } from '@/lib/format';
 import { getBankByCode } from '@/lib/banks';
@@ -28,6 +30,13 @@ export default function ExpensesPage() {
   const [filter, setFilter] = useState<FilterType>('all');
   const [categoryFilter, setCategoryFilter] = useState<CategoryType | 'all'>('all');
   const [showForm, setShowForm] = useState(false);
+  const [showSlipOCR, setShowSlipOCR] = useState(false);
+  const [slipPrefill, setSlipPrefill] = useState<Partial<SlipData> | null>(null);
+
+  const handleSlipOCRConfirm = (data: SlipData) => {
+    setSlipPrefill(data);
+    setShowForm(true);
+  };
 
   const filtered = expenses.filter((e) => {
     if (filter === 'paid' && e.type !== 'paid') return false;
@@ -43,9 +52,18 @@ export default function ExpensesPage() {
           <h2 className="text-lg font-bold text-white">ค่าใช้จ่าย</h2>
           <p className="text-xs text-[#A0A0A0]">{filtered.length} รายการ</p>
         </div>
-        <Button onClick={() => setShowForm(true)} className="gap-2 bg-[#10B981] hover:bg-[#059669] text-white font-semibold text-xs active:scale-95 transition-transform">
-          <Plus size={14} /> เพิ่มรายการ
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => setShowSlipOCR(true)}
+            variant="outline"
+            className="gap-1.5 border-amber-500/30 text-amber-400 hover:bg-amber-500/10 text-xs active:scale-95 transition-transform"
+          >
+            <Scan size={13} /> สแกนสลิป
+          </Button>
+          <Button onClick={() => { setSlipPrefill(null); setShowForm(true); }} className="gap-2 bg-[#10B981] hover:bg-[#059669] text-white font-semibold text-xs active:scale-95 transition-transform">
+            <Plus size={14} /> เพิ่มรายการ
+          </Button>
+        </div>
       </div>
 
       {/* Filter tabs */}
@@ -105,7 +123,7 @@ export default function ExpensesPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-2 stagger-children">
           {filtered.map((exp) => {
             const acc = accounts.find((a) => a.id === exp.accountId);
             const bank = acc ? getBankByCode(acc.bankCode) : undefined;
@@ -113,7 +131,7 @@ export default function ExpensesPage() {
             const categoryInfo = EXPENSE_CATEGORIES.find((c) => c.value === exp.category);
             
             return (
-              <Card key={exp.id} className="bg-[#1A1F26] border-[rgba(255,255,255,0.06)] hover:border-[#10B981]/15 transition-colors">
+              <Card key={exp.id} className="bg-[#1A1F26] border-[rgba(255,255,255,0.06)] hover:border-[#10B981]/15 transition-colors card-hover animate-fade-up">
                 <CardContent className="p-3.5 flex items-center gap-3">
                   {bank && <img src={bank.icon} alt={bank.name} className="w-8 h-8 rounded-lg object-contain bg-white/5 p-0.5 shrink-0" />}
                   <div className="flex-1 min-w-0">
@@ -144,12 +162,13 @@ export default function ExpensesPage() {
         </div>
       )}
 
-      <ExpenseFormDialog open={showForm} onClose={() => setShowForm(false)} />
+      <ExpenseFormDialog open={showForm} onClose={() => { setShowForm(false); setSlipPrefill(null); }} slipPrefill={slipPrefill} />
+      <OCRSlipScanner open={showSlipOCR} onClose={() => setShowSlipOCR(false)} onConfirm={handleSlipOCRConfirm} />
     </div>
   );
 }
 
-function ExpenseFormDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+function ExpenseFormDialog({ open, onClose, slipPrefill }: { open: boolean; onClose: () => void; slipPrefill?: Partial<SlipData> | null }) {
   const { addExpense, accounts, agents } = useStore();
   const [desc, setDesc] = useState('');
   const [amount, setAmount] = useState('');
@@ -162,6 +181,18 @@ function ExpenseFormDialog({ open, onClose }: { open: boolean; onClose: () => vo
   const [expenseTime, setExpenseTime] = useState('');
   const [slipFile, setSlipFile] = useState<File | null>(null);
   const [isRecorded, setIsRecorded] = useState(false);
+
+  // Prefill from OCR Slip
+  useEffect(() => {
+    if (slipPrefill && open) {
+      if (slipPrefill.amount) setAmount(slipPrefill.amount);
+      if (slipPrefill.date) setExpenseDate(slipPrefill.date);
+      if (slipPrefill.time) setExpenseTime(slipPrefill.time);
+      if (slipPrefill.senderName) setRecipient(slipPrefill.senderName);
+      if (slipPrefill.referenceNumber) setDesc(`โอนเงิน Ref: ${slipPrefill.referenceNumber}`);
+      else if (slipPrefill.receiverName) setDesc(`โอนให้ ${slipPrefill.receiverName}`);
+    }
+  }, [slipPrefill, open]);
 
   const reset = () => {
     setDesc('');

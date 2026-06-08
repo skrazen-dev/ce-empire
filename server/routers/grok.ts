@@ -176,6 +176,51 @@ ${input.nextOrderTime ? `- ออเดอร์ถัดไป: ${input.nextOrd
     }
   }),
 
+  // ── Generate Code: สร้างโค้ดด้วย Grok AI
+  generateCode: publicProcedure
+    .input(
+      z.object({
+        prompt: z.string().min(1).max(4000),
+        language: z.string().default("typescript"),
+        context: z.string().optional(),
+        mode: z.enum(["generate", "explain", "fix", "optimize", "convert"]).default("generate"),
+      })
+    )
+    .mutation(async ({ input }) => {
+      const modeInstructions: Record<string, string> = {
+        generate: "Generate clean, production-ready code based on the user's description.",
+        explain: "Explain the provided code clearly and concisely in Thai.",
+        fix: "Find and fix bugs in the provided code. Show what was wrong and the corrected version.",
+        optimize: "Optimize the provided code for performance and readability.",
+        convert: "Convert the provided code to the target language while preserving logic.",
+      };
+
+      const systemPrompt = `You are an expert ${input.language} developer and code assistant for CE Empire internal tools.
+${modeInstructions[input.mode]}
+
+Rules:
+- Write clean, well-commented code
+- Use modern best practices for ${input.language}
+- Include brief Thai comments for complex logic
+- Return ONLY the code block (no markdown fences unless asked)
+- If explaining, respond in Thai`;
+
+      const userPrompt = input.context
+        ? `Context:\n${input.context}\n\nRequest:\n${input.prompt}`
+        : input.prompt;
+
+      const response = await callGrokAPI(
+        [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        "grok-3",
+        0.3
+      );
+
+      return { code: response, language: input.language, mode: input.mode };
+    }),
+
   // ── Test Connection: ทดสอบการเชื่อมต่อ Grok API
   testConnection: publicProcedure.query(async () => {
     if (!GROK_API_KEY) {

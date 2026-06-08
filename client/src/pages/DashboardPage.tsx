@@ -113,13 +113,13 @@ export default function DashboardPage() {
       </section>
 
       {/* ── BIG 4 Headline Metrics ── */}
-      <section className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <section className="grid grid-cols-2 lg:grid-cols-4 gap-3 stagger-children">
         {BIG_METRICS.map((m, i) => {
           const Icon = m.icon;
           return (
             <div
               key={m.label}
-              className="glass-card rounded-2xl p-4 animate-fade-up flex flex-col gap-3"
+              className="glass-card rounded-2xl p-4 animate-fade-up flex flex-col gap-3 card-hover"
               style={{ animationDelay: `${i * 60}ms`, border: `1px solid ${m.color}22`, boxShadow: `0 0 20px ${m.glow}` }}
             >
               <div className="flex items-center justify-between">

@@ -105,3 +105,22 @@
 - [x] เพิ่ม Toast Notification สวยเมื่อคัดลอก/บันทึก
 - [x] ปรับ Empty State ให้ดีขึ้น (icon + CTA button)
 - [x] ทดสอบ mobile responsive ทุกหน้า + Tests 24/24 pass
+
+## Phase 2 - OCR System + Premium UI
+
+### A. OCR System
+- [ ] ติดตั้ง tesseract.js + สร้าง useOCR hook พร้อม image preprocessing
+- [ ] สร้าง OCRIDCardScanner component: อ่านเลขบัตร/ชื่อ/สกุล/วันเกิด + ฟอร์มแก้ไข
+- [ ] สร้าง OCRSlipScanner component: อ่านจำนวนเงิน/วันที่/เวลา/ผู้โอน/ผู้รับ/เลขอ้างอิง + ฟอร์มแก้ไข
+- [ ] เพิ่มปุ่ม OCR ใน AccountsPage (สแกนบัตร) + ExpensesPage (สแกนสลิป)
+- [ ] แสดง Loading progress ขณะ OCR ประมวลผล
+
+### B. Premium UI
+- [ ] เพิ่ม Skeleton Loading ใน AccountsPage, ExpensesPage, AgentsPage, DashboardPage
+- [ ] เพิ่ม page transition animation (fade/slide)
+- [ ] ปรับ Card, Shadow, Typography, Spacing ให้พรีเมี่ยม
+- [ ] ปรับ Empty State ทุกหน้าให้สวยและมีคำแนะนำ
+- [ ] ทดสอบ mobile responsive + Tests pass
+
+## Grok Code Generation Backend
+- [x] สร้าง backend: grok.generateCode procedure ใน server/routers/grok.ts - สำหรับแก้ bugs, optimize, explain, convert code

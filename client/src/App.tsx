@@ -18,6 +18,7 @@ import SettingsPage from "@/pages/SettingsPage";
 import BulkCalcPage from "@/pages/BulkCalcPage";
 import RiskAnalysisPage from "@/pages/RiskAnalysisPage";
 import TasksPage from "@/pages/TasksPage";
+
 import LoadingScreen from "@/components/LoadingScreen";
 import { useState } from "react";
 
@@ -34,6 +35,7 @@ function PageRenderer() {
     case 'bulk-calc': return <BulkCalcPage />;
     case 'risk-analysis': return <RiskAnalysisPage />;
     case 'tasks': return <TasksPage />;
+
     case 'settings': return <SettingsPage />;
     default: return <DashboardPage />;
   }

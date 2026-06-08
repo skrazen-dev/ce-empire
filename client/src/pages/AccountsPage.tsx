@@ -1,5 +1,7 @@
-import { useState } from 'react';
-import { Plus, Search, Trash2, Eye, EyeOff, Copy, Check, CreditCard, TrendingUp, AlertCircle, Wallet } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, Search, Trash2, Eye, EyeOff, Copy, Check, CreditCard, TrendingUp, AlertCircle, Wallet, Scan } from 'lucide-react';
+import { OCRIDCardScanner } from '@/components/OCRIDCardScanner';
+import type { IDCardData } from '@/hooks/useOCR';
 import { toast } from 'sonner';  
 import { useStore } from '@/lib/store';
 import { getBankByCode, BANKS } from '@/lib/banks';
@@ -14,8 +16,15 @@ import { cn } from '@/lib/utils';
 export default function AccountsPage() {
   const { accounts, addAccount, deleteAccount } = useStore();
   const [showForm, setShowForm] = useState(false);
+  const [showOCR, setShowOCR] = useState(false);
   const [revealedPins, setRevealedPins] = useState<Set<string>>(new Set());
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [ocrPrefill, setOcrPrefill] = useState<Partial<IDCardData> | null>(null);
+
+  const handleOCRConfirm = (data: IDCardData) => {
+    setOcrPrefill(data);
+    setShowForm(true);
+  };
 
   const togglePin = (id: string) => {
     setRevealedPins((prev) => {
@@ -46,9 +55,18 @@ export default function AccountsPage() {
           <h2 className="text-lg font-bold text-white">บัญชีทั้งหมด</h2>
           <p className="text-xs text-[#A0A0A0]">{accounts.length} บัญชี</p>
         </div>
-        <Button onClick={() => setShowForm(true)} className="gap-2 bg-[#FF8C42] hover:bg-[#E67E2F] text-white font-semibold text-xs active:scale-95 transition-transform">
-          <Plus size={14} /> เพิ่มบัญชี
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => setShowOCR(true)}
+            variant="outline"
+            className="gap-1.5 border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10 text-xs active:scale-95 transition-transform"
+          >
+            <Scan size={13} /> สแกนบัตร
+          </Button>
+          <Button onClick={() => { setOcrPrefill(null); setShowForm(true); }} className="gap-2 bg-[#FF8C42] hover:bg-[#E67E2F] text-white font-semibold text-xs active:scale-95 transition-transform">
+            <Plus size={14} /> เพิ่มบัญชี
+          </Button>
+        </div>
       </div>
 
       {/* Quick Stats Cards */}
@@ -103,11 +121,11 @@ export default function AccountsPage() {
           </Button>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-3 stagger-children">
           {accounts.map((acc) => {
             const bank = getBankByCode(acc.bankCode);
             return (
-              <Card key={acc.id} className="bg-[#1A1F26] border-[rgba(255,140,66,0.15)] group hover:border-[#FF8C42]/30 transition-colors">
+              <Card key={acc.id} className="bg-[#1A1F26] border-[rgba(255,140,66,0.15)] group hover:border-[#FF8C42]/30 transition-colors card-hover animate-fade-up">
                 <CardContent className="p-4">
                   {/* Header */}
                   <div className="flex items-center gap-3 mb-3">
@@ -327,12 +345,13 @@ export default function AccountsPage() {
         </div>
       )}
 
-      <AccountFormDialog open={showForm} onClose={() => setShowForm(false)} />
+      <AccountFormDialog open={showForm} onClose={() => { setShowForm(false); setOcrPrefill(null); }} ocrPrefill={ocrPrefill} />
+      <OCRIDCardScanner open={showOCR} onClose={() => setShowOCR(false)} onConfirm={handleOCRConfirm} />
     </div>
   );
 }
 
-function AccountFormDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+function AccountFormDialog({ open, onClose, ocrPrefill }: { open: boolean; onClose: () => void; ocrPrefill?: Partial<IDCardData> | null }) {
   const { addAccount } = useStore();
   const [selectedBank, setSelectedBank] = useState('');
   const [accountNo, setAccountNo] = useState('');
@@ -353,6 +372,16 @@ function AccountFormDialog({ open, onClose }: { open: boolean; onClose: () => vo
   const [accountPassword, setAccountPassword] = useState('');
   const [accountTypes, setAccountTypes] = useState<('complete' | 'skrill' | 'neteller' | 'bigpay')[]>([]);  
   const [creditLimit, setCreditLimit] = useState<'50k' | '200k' | '500k' | ''>('');
+
+  // Prefill from OCR
+  useEffect(() => {
+    if (ocrPrefill && open) {
+      if (ocrPrefill.firstName) setFirstName(ocrPrefill.firstName);
+      if (ocrPrefill.lastName) setLastName(ocrPrefill.lastName);
+      if (ocrPrefill.idNumber) setIdCardNumber(ocrPrefill.idNumber);
+      if (ocrPrefill.dateOfBirth) setDateOfBirth(ocrPrefill.dateOfBirth);
+    }
+  }, [ocrPrefill, open]);
 
   const reset = () => {
     setSelectedBank(''); setAccountNo(''); setPhone('');
