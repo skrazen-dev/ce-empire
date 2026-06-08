@@ -1,5 +1,4 @@
 import { CreditCard, TrendingUp, TrendingDown, Receipt, DollarSign, Zap, BarChart3, CheckCircle2 } from 'lucide-react';
-import { useStore } from '@/lib/store';
 import { money } from '@/lib/format';
 import PinnedAccountsWidget from '@/components/PinnedAccountsWidget';
 import { trpc } from '@/lib/trpc';
@@ -38,21 +37,22 @@ function MiniBarChart({ data, color, valueKey = 'amount' }: { data: any[]; color
 }
 
 export default function DashboardPage() {
-  const { accounts, expenses } = useStore();
+  const { data: accounts = [] } = trpc.accounts.list.useQuery();
+  const { data: expenses = [] } = trpc.expenses.list.useQuery();
   const { data: summary, isLoading } = trpc.analytics.getSummaryToday.useQuery();
   const { data: chartData } = trpc.analytics.getDailyChart.useQuery({ days: 7 });
   const chart = chartData ?? FALLBACK_CHART;
 
   const totalAccounts = accounts.length;
-  const totalPaid = accounts.reduce((s, a) => s + a.paidAmount, 0);
-  const totalDue = accounts.reduce((s, a) => s + a.dueAmount, 0);
-  const totalExpenses = expenses.reduce((s, e) => s + e.amount, 0);
+  const totalExpenses = expenses.reduce((s, e) => s + parseFloat(e.amount || '0'), 0);
+  const totalPaid = expenses.filter(e => e.status === 'paid').reduce((s, e) => s + parseFloat(e.amount || '0'), 0);
+  const totalDue = expenses.filter(e => e.status === 'pending').reduce((s, e) => s + parseFloat(e.amount || '0'), 0);
 
-  // Account status stats (accountType is now an array)
-  const skrillCount = accounts.filter(a => a.accountType?.includes('skrill')).length;
-  const netellerCount = accounts.filter(a => a.accountType?.includes('neteller')).length;
-  const bigpayCount = accounts.filter(a => a.accountType?.includes('bigpay')).length;
-  const completeCount = accounts.filter(a => a.accountType?.includes('complete')).length;
+  // Account status stats
+  const skrillCount = accounts.filter(a => a.accountType === 'skrill').length;
+  const netellerCount = accounts.filter(a => a.accountType === 'neteller').length;
+  const bigpayCount = accounts.filter(a => a.accountType === 'bigpay').length;
+  const completeCount = accounts.filter(a => a.accountType === 'complete').length;
   const limit50k = accounts.filter(a => a.creditLimit === '50k').length;
   const limit200k = accounts.filter(a => a.creditLimit === '200k').length;
   const limit500k = accounts.filter(a => a.creditLimit === '500k').length;
