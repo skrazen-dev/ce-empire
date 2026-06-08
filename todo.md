@@ -7,11 +7,11 @@
 - [x] ทดสอบ + Checkpoint
 
 ## Dashboard Charts (Deposits, USDT, Profit)
-- [ ] ออกแบบ Schema: deposits_slips, usdt_uploads, profit_records tables
-- [ ] สร้าง Backend: analytics.ts router (getDeposits, getUSDT, getProfitToday)
-- [ ] สร้าง Frontend: Charts components (DepositChart, USDTChart, ProfitChart)
-- [ ] เชื่อม Charts เข้า Dashboard page
-- [ ] ทดสอบ + Checkpoint
+- [x] ออกแบบ Schema: deposit_slips, usdt_uploads, profit_records tables ใน Supabase
+- [x] สร้าง Backend: analytics.ts router (getDeposits, getUSDT, getProfitToday) ใช้ Supabase
+- [x] สร้าง Frontend: Charts components ใน DashboardPage
+- [x] เชื่อม Charts เข้า Dashboard page
+- [x] ทดสอบ + Checkpoint (8eb09e62)
 
 ## Task Management + Team Dashboard
 - [x] ออกแบบ Schema: tasks, team_members types
@@ -24,9 +24,10 @@
 ## Bank Account Extended Fields
 - [x] เพิ่ม fields ใน accounts schema: profilePhoto, idCardNumber, dateOfBirth, virtualCardNumber, cardCVV, cardExpiry, accountEmail, accountPassword
 - [x] อัปเดต Frontend: Account form + file upload สำหรับ profile photo + ID card
-- [ ] อัปเดต Backend: accounts router + DB helpers + file upload
-- [ ] เพิ่ม encryption สำหรับ sensitive data (card number, CVV, password)
-- [ ] ทดสอบ + Checkpoint
+- [x] อัปเดต Backend: accounts router + DB helpers + file upload (accounts.uploadPhoto tRPC procedure)
+- [x] เพิ่ม encryption สำหรับ sensitive data (AES-256-GCM: virtualCardNumber, cardCVV, accountPassword)
+- [x] สร้าง server/crypto.ts - encrypt/decrypt helpers
+- [x] ทดสอบ + 29/29 passed
 
 ## UI Refinement
 - [x] ปรับแตง SummaryStatsCard: แสดงทั้งหมด + Edit/Copy buttons
@@ -109,18 +110,18 @@
 ## Phase 2 - OCR System + Premium UI
 
 ### A. OCR System
-- [ ] ติดตั้ง tesseract.js + สร้าง useOCR hook พร้อม image preprocessing
-- [ ] สร้าง OCRIDCardScanner component: อ่านเลขบัตร/ชื่อ/สกุล/วันเกิด + ฟอร์มแก้ไข
-- [ ] สร้าง OCRSlipScanner component: อ่านจำนวนเงิน/วันที่/เวลา/ผู้โอน/ผู้รับ/เลขอ้างอิง + ฟอร์มแก้ไข
-- [ ] เพิ่มปุ่ม OCR ใน AccountsPage (สแกนบัตร) + ExpensesPage (สแกนสลิป)
-- [ ] แสดง Loading progress ขณะ OCR ประมวลผล
+- [x] ติดตั้ง tesseract.js + สร้าง useOCR hook พร้อม image preprocessing
+- [x] สร้าง OCRIDCardScanner component: อ่านเลขบัตร/ชื่อ/สกุล/วันเกิด + ฟอร์มแก้ไข
+- [x] สร้าง OCRSlipScanner component: อ่านจำนวนเงิน/วันที่/เวลา/ผู้โอน/ผู้รับ/เลขอ้างอิง + ฟอร์มแก้ไข
+- [x] เพิ่มปุ่ม OCR ใน AccountsPage (สแกนบัตร) + ExpensesPage (สแกนสลิป)
+- [x] แสดง Loading progress ขณะ OCR ประมวลผล
 
 ### B. Premium UI
-- [ ] เพิ่ม Skeleton Loading ใน AccountsPage, ExpensesPage, AgentsPage, DashboardPage
-- [ ] เพิ่ม page transition animation (fade/slide)
-- [ ] ปรับ Card, Shadow, Typography, Spacing ให้พรีเมี่ยม
-- [ ] ปรับ Empty State ทุกหน้าให้สวยและมีคำแนะนำ
-- [ ] ทดสอบ mobile responsive + Tests pass
+- [x] เพิ่ม Skeleton Loading ใน AccountsPage, ExpensesPage, AgentsPage, DashboardPage
+- [x] เพิ่ม page transition animation (fade/slide) - PageTransition component
+- [x] ปรับ Card, Shadow, Typography, Spacing ให้พรีเมียม - card-hover + animate-fade-up
+- [x] ปรับ Empty State ทุกหน้าให้สวยและมีคำแนะนำ
+- [x] ทดสอบ mobile responsive + Tests 29/29 pass
 
 ## Grok Code Generation Backend
 - [x] สร้าง backend: grok.generateCode procedure ใน server/routers/grok.ts - สำหรับแก้ bugs, optimize, explain, convert code
@@ -134,3 +135,12 @@
 - [x] ปรับ server/_core/oauth.ts ให้ upsert user ไป Supabase
 - [x] แก้ index.css build error (Missing opening {)
 - [x] Tests: 29/29 passed
+
+## Phase 4 - Bank Account Backend + Encryption
+- [x] สร้าง server/crypto.ts - AES-256-GCM encrypt/decrypt helpers
+- [x] เพิ่ม encryptSensitiveFields ใน accounts.update mutation
+- [x] เพิ่ม decryptSensitiveFields ใน getAccountsSb (read-time decryption)
+- [x] สร้าง accounts.uploadPhoto tRPC procedure - อัปโหลด profile/idcard photos ไป storage
+- [x] TypeScript: 0 errors
+- [x] Tests: 29/29 passed
+- [x] Checkpoint saved

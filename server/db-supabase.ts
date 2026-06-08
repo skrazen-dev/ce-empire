@@ -5,6 +5,7 @@
  */
 import { supabaseAdmin } from "./supabase";
 import { ENV } from "./_core/env";
+import { decryptSensitiveFields } from "./crypto";
 import type {
   Account,
   Agent,
@@ -179,7 +180,7 @@ export async function getAccountsSb(userId: number): Promise<Account[]> {
     console.error("[Supabase] getAccounts error:", error.message);
     return [];
   }
-  return (data ?? []).map((row) => mapAccount(row as Record<string, unknown>));
+  return (data ?? []).map((row) => decryptSensitiveFields(mapAccount(row as Record<string, unknown>)) as Account);
 }
 
 export async function createAccountSb(data: {

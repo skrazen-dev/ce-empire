@@ -9,6 +9,8 @@ import { grokRouter } from "./routers/grok";
 import { tasksRouter } from "./routers/tasks";
 import { teamRouter } from "./routers/team";
 import { analyticsRouter } from "./routers/analytics";
+import { encryptSensitiveFields, decryptSensitiveFields } from "./crypto";
+import { storagePut } from "./storage";
 import {
   getAccountsSb,
   createAccountSb,
@@ -77,7 +79,33 @@ const accountsRouter = router({
     )
     .mutation(({ ctx, input }) => {
       const { id, ...data } = input;
-      return updateAccountSb(id, ctx.user.id, data);
+      // Encrypt sensitive fields before saving
+      const encrypted = encryptSensitiveFields(data);
+      return updateAccountSb(id, ctx.user.id, encrypted as typeof data);
+    }),
+
+  // Upload profile photo or ID card photo to storage
+  uploadPhoto: protectedProcedure
+    .input(
+      z.object({
+        accountId: z.number().int().positive(),
+        photoType: z.enum(["profile", "idcard"]),
+        // base64 encoded image data
+        base64Data: z.string(),
+        mimeType: z.string().default("image/jpeg"),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { accountId, photoType, base64Data, mimeType } = input;
+      const buffer = Buffer.from(base64Data, "base64");
+      const ext = mimeType.split("/")[1] ?? "jpg";
+      const key = `accounts/${ctx.user.id}/${photoType}-${accountId}-${Date.now()}.${ext}`;
+      const { url } = await storagePut(key, buffer, mimeType);
+
+      // Update the account with the new photo URL
+      const field = photoType === "profile" ? "profilePhotoUrl" : "idCardPhotoUrl";
+      await updateAccountSb(accountId, ctx.user.id, { [field]: url });
+      return { url };
     }),
 
   delete: protectedProcedure
