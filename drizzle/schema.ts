@@ -53,7 +53,7 @@ export const accounts = mysqlTable("accounts", {
   cardExpiryDate: varchar("cardExpiryDate", { length: 10 }),
   accountEmail: varchar("accountEmail", { length: 320 }),
   accountPassword: varchar("accountPassword", { length: 255 }),
-  accountType: mysqlEnum("accountType", ["complete", "skrill", "neteller", "bigpay"]),
+  accountType: text("accountType"), // JSON array string e.g. '["skrill","neteller"]'
   accountStatus: varchar("accountStatus", { length: 50 }),
   creditLimit: mysqlEnum("creditLimit", ["50k", "200k", "500k"]),
   createdAt: timestamp("createdAt").defaultNow().notNull(),

@@ -144,3 +144,14 @@
 - [x] TypeScript: 0 errors
 - [x] Tests: 29/29 passed
 - [x] Checkpoint saved
+
+## Phase 1 - Bug Fixes + Premium UI
+- [ ] แก้ Dropdown "เลือกบัญชีธนาคาร" ใน PinnedAccounts ให้ดึงข้อมูลจริง (fallback จาก local store)
+- [ ] เปลี่ยน "ประเภทบัญชี" เป็น Multi-select Chips (เลือกได้หลายตัว)
+- [ ] แก้ Text overflow ทั้งแอป (truncate, line-clamp)
+- [ ] แก้เมนูบัญชีให้แสดงผลและใช้งานได้ดีขึ้น (card layout, spacing)
+- [ ] เพิ่ม Quick Stats Cards ใน Accounts page (4 cards: บัญชี/จ่าย/ค้าง/รวม)
+- [ ] ปรับ Bottom Navigation ใหม่: 5 primary tabs + More drawer
+- [ ] เพิ่ม Toast Notification สวยเมื่อคัดลอก/บันทึก
+- [ ] ปรับ Empty State ให้ดีขึ้น (icon + CTA button)
+- [ ] ทดสอบ mobile responsive ทุกหน้า + Tests 24/24 pass

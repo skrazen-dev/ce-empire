@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Plus, Trash2, Eye, EyeOff, Copy, Check, CreditCard, TrendingUp, AlertCircle, Wallet, Scan, Loader2 } from 'lucide-react';
+import { Plus, Trash2, Eye, EyeOff, Copy, Check, CreditCard, TrendingUp, AlertCircle, Wallet, Scan, Loader2, X } from 'lucide-react';
 import { OCRIDCardScanner } from '@/components/OCRIDCardScanner';
 import type { IDCardData } from '@/hooks/useOCR';
 import { toast } from 'sonner';
@@ -214,9 +214,23 @@ export default function AccountsPage() {
                           {acc.accountType && (
                             <div>
                               <p className="text-[9px] text-[#A0A0A0] mb-1">ประเภท</p>
-                              <span className="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-[#FF8C42]/20 border border-[#FF8C42]/40 text-[#FF8C42]">
-                                {acc.accountType === 'complete' ? 'แอคตัดครบ' : acc.accountType.toUpperCase()}
-                              </span>
+                              <div className="flex flex-wrap gap-1">
+                                {(() => {
+                                  try {
+                                    const types = typeof acc.accountType === 'string' ? JSON.parse(acc.accountType) : acc.accountType;
+                                    return Array.isArray(types) ? types : [types];
+                                  } catch {
+                                    return [acc.accountType];
+                                  }
+                                })().map((type: string) => {
+                                  const label = type === 'complete' ? 'แอคตัดครบ' : type.toUpperCase();
+                                  return (
+                                    <span key={type} className="px-2 py-0.5 rounded-full text-[9px] font-semibold bg-[#FF8C42]/20 border border-[#FF8C42]/40 text-[#FF8C42]">
+                                      {label}
+                                    </span>
+                                  );
+                                })}
+                              </div>
                             </div>
                           )}
                           {acc.creditLimit && (
@@ -369,7 +383,7 @@ function AccountFormDialog({ open, onClose, ocrPrefill }: { open: boolean; onClo
   const [cardExpiryDate, setCardExpiryDate] = useState('');
   const [accountEmail, setAccountEmail] = useState('');
   const [accountPassword, setAccountPassword] = useState('');
-  const [accountType, setAccountType] = useState<'complete' | 'skrill' | 'neteller' | 'bigpay' | ''>('');
+  const [accountTypes, setAccountTypes] = useState<string[]>([]);
   const [creditLimit, setCreditLimit] = useState<'50k' | '200k' | '500k' | ''>('');
 
   // Prefill from OCR
@@ -387,7 +401,7 @@ function AccountFormDialog({ open, onClose, ocrPrefill }: { open: boolean; onClo
     setBalance('0'); setNote(''); setIdCardNumber('');
     setVirtualCardNumber(''); setCardCVV(''); setCardExpiryDate('');
     setAccountEmail(''); setAccountPassword('');
-    setAccountType(''); setCreditLimit('');
+    setAccountTypes([]); setCreditLimit('');
   };
 
   const handleSubmit = () => {
@@ -404,6 +418,14 @@ function AccountFormDialog({ open, onClose, ocrPrefill }: { open: boolean; onClo
       balance,
       note: note || undefined,
       isActive: 'yes',
+      accountType: accountTypes.length > 0 ? JSON.stringify(accountTypes) : undefined,
+      creditLimit: creditLimit || undefined,
+      idCardNumber: idCardNumber || undefined,
+      virtualCardNumber: virtualCardNumber || undefined,
+      cardCVV: cardCVV || undefined,
+      cardExpiryDate: cardExpiryDate || undefined,
+      accountEmail: accountEmail || undefined,
+      accountPassword: accountPassword || undefined,
     });
   };
 
@@ -468,23 +490,27 @@ function AccountFormDialog({ open, onClose, ocrPrefill }: { open: boolean; onClo
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label className="text-[#A0A0A0] mb-2 block">ประเภทบัญชี</Label>
+              <Label className="text-[#A0A0A0] mb-2 block">ประเภทบัญชี (เลือกได้หลายตัว)</Label>
               <div className="grid grid-cols-2 gap-2">
-                {(['complete', 'skrill', 'neteller', 'bigpay'] as const).map((type) => (
-                  <button
-                    key={type}
-                    type="button"
-                    onClick={() => setAccountType(prev => prev === type ? '' : type)}
-                    className={cn(
-                      'px-2 py-1.5 rounded-lg border text-[10px] font-semibold transition-all active:scale-95',
-                      accountType === type
-                        ? 'border-[#FF8C42] bg-[#FF8C42]/20 text-[#FF8C42]'
-                        : 'border-[rgba(255,255,255,0.08)] text-[#A0A0A0] hover:border-[#FF8C42]/30'
-                    )}
-                  >
-                    {type === 'complete' ? 'แอคตัดครบ' : type.toUpperCase()}
-                  </button>
-                ))}
+                {(['complete', 'skrill', 'neteller', 'bigpay'] as const).map((type) => {
+                  const label = type === 'complete' ? 'แอคตัดครบ' : type.toUpperCase();
+                  const isSelected = accountTypes.includes(type);
+                  return (
+                    <button
+                      key={type}
+                      type="button"
+                      onClick={() => setAccountTypes(prev => prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type])}
+                      className={cn(
+                        'px-3 py-1.5 rounded-lg border text-[11px] font-semibold transition-all active:scale-95',
+                        isSelected
+                          ? 'border-[#FF8C42] bg-[#FF8C42]/20 text-[#FF8C42]'
+                          : 'border-[rgba(255,255,255,0.08)] text-[#A0A0A0] hover:border-[#FF8C42]/30'
+                      )}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
             <div>

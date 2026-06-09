@@ -38,7 +38,7 @@ function mapAccount(row: Record<string, unknown>): Account {
     cardExpiryDate: (row.card_expiry_date as string | null) ?? null,
     accountEmail: (row.account_email as string | null) ?? null,
     accountPassword: (row.account_password as string | null) ?? null,
-    accountType: (row.account_type as "complete" | "skrill" | "neteller" | "bigpay" | null) ?? null,
+    accountType: (row.account_type as string | null) ?? null, // stored as JSON array string
     accountStatus: (row.account_status as string | null) ?? null,
     creditLimit: (row.credit_limit as "50k" | "200k" | "500k" | null) ?? null,
     createdAt: new Date(row.created_at as string),

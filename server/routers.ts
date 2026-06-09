@@ -46,11 +46,31 @@ const accountsRouter = router({
         balance: z.string().default("0.00"),
         note: z.string().optional(),
         isActive: z.enum(["yes", "no"]).default("yes"),
+        accountType: z.string().optional().nullable(),
+        creditLimit: z.string().optional().nullable(),
+        idCardNumber: z.string().optional().nullable(),
+        virtualCardNumber: z.string().optional().nullable(),
+        cardCVV: z.string().optional().nullable(),
+        cardExpiryDate: z.string().optional().nullable(),
+        accountEmail: z.string().optional().nullable(),
+        accountPassword: z.string().optional().nullable(),
       })
     )
-    .mutation(({ ctx, input }) =>
-      createAccountSb({ userId: ctx.user.id, ...input })
-    ),
+    .mutation(({ ctx, input }) => {
+      const { accountType, creditLimit, idCardNumber, virtualCardNumber, cardCVV, cardExpiryDate, accountEmail, accountPassword, ...baseInput } = input;
+      return createAccountSb({
+        userId: ctx.user.id,
+        ...baseInput,
+        ...(accountType && { accountType }),
+        ...(creditLimit && { creditLimit }),
+        ...(idCardNumber && { idCardNumber }),
+        ...(virtualCardNumber && { virtualCardNumber }),
+        ...(cardCVV && { cardCVV }),
+        ...(cardExpiryDate && { cardExpiryDate }),
+        ...(accountEmail && { accountEmail }),
+        ...(accountPassword && { accountPassword }),
+      });
+    }),
 
   update: protectedProcedure
     .input(
