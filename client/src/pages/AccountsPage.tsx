@@ -248,7 +248,7 @@ export default function AccountsPage() {
                         <div className="flex items-center justify-between px-2 py-1.5 rounded-lg bg-[#0F1419]/50 hover:bg-[#0F1419]/70 transition-colors">
                           <div className="flex-1 min-w-0">
                             <span className="text-[#A0A0A0]">เลขบช: </span>
-                            <span className="text-white font-mono text-[8px]">{acc.accountNumber}</span>
+                            <span className="text-white font-mono text-[8px] truncate">{acc.accountNumber}</span>
                           </div>
                           <button
                             onClick={() => copyToClipboard(acc.accountNumber, `acc-${acc.id}`)}
@@ -262,7 +262,7 @@ export default function AccountsPage() {
                         <div className="flex items-center justify-between px-2 py-1.5 rounded-lg bg-[#0F1419]/50 hover:bg-[#0F1419]/70 transition-colors">
                           <div className="flex-1 min-w-0">
                             <span className="text-[#A0A0A0]">ชื่อ: </span>
-                            <span className="text-white text-[8px]">{acc.accountName}</span>
+                            <span className="text-white text-[8px] truncate">{acc.accountName}</span>
                           </div>
                           <button
                             onClick={() => copyToClipboard(acc.accountName, `name-${acc.id}`)}

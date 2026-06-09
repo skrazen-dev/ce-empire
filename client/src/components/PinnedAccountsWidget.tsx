@@ -111,7 +111,7 @@ function AddPinDialog({
     // Fallback: use local store accounts formatted to match expected shape
     return localAccounts.map(a => ({
       id: parseInt(a.id.replace(/[^0-9]/g, '').slice(0, 8) || '0', 10) || Math.abs(a.id.split('').reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 0)),
-      bankName: a.bankCode,
+      bankName: a.bankName || a.bankCode,
       accountName: `${a.firstName} ${a.lastName}`.trim() || a.accountNo,
       accountNumber: a.accountNo,
     }));
@@ -161,11 +161,11 @@ function AddPinDialog({
                 )}
                 {mergedAccounts.map((acc) => (
                   <SelectItem key={acc.id} value={String(acc.id)} className="text-white hover:bg-slate-700">
-                    <span className="flex items-center gap-2">
-                      <span className="text-xs font-medium text-white">{acc.bankName}</span>
-                      <span className="text-slate-400 text-xs">{acc.accountName}</span>
-                      {acc.accountNumber && <span className="text-slate-500 text-[10px] font-mono">{acc.accountNumber.slice(-4)}</span>}
-                    </span>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-xs font-medium text-white truncate">{acc.bankName}</span>
+                      <span className="text-slate-400 text-xs truncate">{acc.accountName}</span>
+                      {acc.accountNumber && <span className="text-slate-500 text-[10px] font-mono shrink-0">{maskAccountNumber(acc.accountNumber)}</span>}
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
