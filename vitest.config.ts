@@ -1,19 +1,19 @@
-import { defineConfig } from "vitest/config";
-import path from "path";
-
-const templateRoot = path.resolve(import.meta.dirname);
+import tsconfigPaths from "vite-tsconfig-paths"
+import { configDefaults, defineConfig } from "vitest/config"
 
 export default defineConfig({
-  root: templateRoot,
-  resolve: {
-    alias: {
-      "@": path.resolve(templateRoot, "client", "src"),
-      "@shared": path.resolve(templateRoot, "shared"),
-      "@assets": path.resolve(templateRoot, "attached_assets"),
-    },
-  },
   test: {
-    environment: "node",
-    include: ["server/**/*.test.ts", "server/**/*.spec.ts"],
+    exclude: [
+      ...configDefaults.exclude,
+      "**/node_modules/**",
+      "**/fixtures/**",
+      "**/templates/**",
+      "**/packages/tests/**",
+    ],
   },
-});
+  plugins: [
+    tsconfigPaths({
+      ignoreConfigErrors: true,
+    }),
+  ],
+})
