@@ -380,21 +380,14 @@ export default function RiskAnalysisPage() {
   const [addOrderModal, setAddOrderModal] = useState<{ accountId: number; accountName: string } | null>(null);
 
   const settingsQuery = trpc.settings.get.useQuery();
-  const riskQuery = trpc.risk.analyzeAll.useQuery(undefined, {
-    refetchInterval: 60_000, // refresh ทุก 1 นาที
-  });
-  const alertsQuery = trpc.risk.listAlerts.useQuery({ unreadOnly: true, limit: 20 });
-  const markRead = trpc.risk.markAlertRead.useMutation({
-    onSuccess: () => alertsQuery.refetch(),
-  });
+  const alertsQuery = trpc.risk.listAlerts.useQuery({ limit: 20 });
 
   const botToken = settingsQuery.data?.telegramBotToken ?? '';
   const chatId = settingsQuery.data?.telegramChatId ?? '';
 
-  const results = (riskQuery.data ?? []).filter(Boolean) as NonNullable<typeof riskQuery.data>[number][];
-  const criticalCount = results.filter(r => r?.overallLevel === 'critical').length;
-  const highCount = results.filter(r => r?.overallLevel === 'high').length;
-  const unreadAlerts = alertsQuery.data ?? [];
+  const alerts = alertsQuery.data ?? [];
+  const criticalCount = alerts.filter(a => a.riskLevel === 'critical').length;
+  const highCount = alerts.filter(a => a.riskLevel === 'high').length;
 
   return (
     <div className="space-y-4 pb-24 md:pb-4">
@@ -411,10 +404,10 @@ export default function RiskAnalysisPage() {
           variant="outline"
           size="sm"
           className="border-[#2A3441] text-[#A0A0A0] hover:text-white"
-          onClick={() => riskQuery.refetch()}
-          disabled={riskQuery.isFetching}
+          onClick={() => alertsQuery.refetch()}
+          disabled={alertsQuery.isFetching}
         >
-          <RefreshCw size={14} className={riskQuery.isFetching ? 'animate-spin' : ''} />
+          <RefreshCw size={14} className={alertsQuery.isFetching ? 'animate-spin' : ''} />
         </Button>
       </div>
 
@@ -425,7 +418,7 @@ export default function RiskAnalysisPage() {
             <TrendingUp size={14} className="text-[#00D4FF]" />
             <span className="text-xs text-[#A0A0A0]">บัญชีทั้งหมด</span>
           </div>
-          <p className="text-2xl font-bold text-white">{results.length}</p>
+          <p className="text-2xl font-bold text-white">{alerts.length}</p>
         </Card>
         <Card className={`rounded-xl p-3 border ${criticalCount > 0 ? 'bg-red-400/10 border-red-400/30' : 'bg-[#1A2332] border-[#2A3441]'}`}>
           <div className="flex items-center gap-2 mb-1">
@@ -446,15 +439,15 @@ export default function RiskAnalysisPage() {
             <Clock size={14} className="text-yellow-400" />
             <span className="text-xs text-[#A0A0A0]">แจ้งเตือนใหม่</span>
           </div>
-          <p className="text-2xl font-bold text-white">{unreadAlerts.length}</p>
+          <p className="text-2xl font-bold text-white">{alerts.length}</p>
         </Card>
       </div>
 
       {/* Unread Alerts */}
-      {unreadAlerts.length > 0 && (
+      {alerts.length > 0 && (
         <div className="space-y-2">
           <h2 className="text-sm font-semibold text-[#A0A0A0]">การแจ้งเตือนที่ยังไม่อ่าน</h2>
-          {unreadAlerts.map((alert) => {
+          {alerts.map((alert: any) => {
             const cfg = LEVEL_CONFIG[alert.riskLevel as RiskLevel];
             return (
               <div key={alert.id} className={`flex items-start gap-3 p-3 rounded-xl border ${cfg.border} ${cfg.bg}`}>
@@ -467,7 +460,6 @@ export default function RiskAnalysisPage() {
                   </p>
                 </div>
                 <button
-                  onClick={() => markRead.mutate({ alertId: alert.id })}
                   className="text-xs text-[#A0A0A0] hover:text-white px-2 py-1 rounded-lg hover:bg-[#2A3441] transition-colors shrink-0"
                 >
                   อ่านแล้ว
@@ -482,13 +474,13 @@ export default function RiskAnalysisPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2">
           {/* Risk Cards */}
-          {riskQuery.isLoading ? (
+          {alertsQuery.isLoading ? (
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
             <div key={i} className="h-40 bg-[#1A2332] rounded-2xl animate-pulse border border-[#2A3441]" />
           ))}
         </div>
-      ) : results.length === 0 ? (
+      ) : alerts.length === 0 ? (
         <Card className="bg-[#1A2332] border-[#2A3441] rounded-2xl p-8 text-center">
           <ShieldCheck size={40} className="text-green-400 mx-auto mb-3" />
           <p className="text-white font-semibold">ยังไม่มีบัญชีที่ active</p>
@@ -497,10 +489,10 @@ export default function RiskAnalysisPage() {
       ) : (
         <div className="space-y-3">
           {/* Sort: critical first, then high, medium, low */}
-          {[...results]
+          {[...alerts]
             .sort((a, b) => {
-              const order: Record<RiskLevel, number> = { critical: 0, high: 1, medium: 2, low: 3 };
-              return order[a!.overallLevel as RiskLevel] - order[b!.overallLevel as RiskLevel];
+              const order: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3 };
+              return order[a!.riskLevel as string] - order[b!.riskLevel as string];
             })
             .map((result) =>
               result ? (
@@ -510,7 +502,7 @@ export default function RiskAnalysisPage() {
                   botToken={botToken}
                   chatId={chatId}
                   onAddOrder={(id, name) => setAddOrderModal({ accountId: id, accountName: name })}
-                  onRefresh={() => riskQuery.refetch()}
+                  onRefresh={() => alertsQuery.refetch()}
                 />
               ) : null
             )}
@@ -518,7 +510,7 @@ export default function RiskAnalysisPage() {
       )}
         </div>
         <div className="lg:col-span-1">
-          <GrokChatPanel accountData={results.length > 0 ? results[0] : undefined} />
+          <GrokChatPanel accountData={alerts.length > 0 ? alerts[0] : undefined} />
         </div>
       </div>
 
@@ -529,7 +521,6 @@ export default function RiskAnalysisPage() {
           accountName={addOrderModal.accountName}
           onClose={() => setAddOrderModal(null)}
           onSuccess={() => {
-            riskQuery.refetch();
             alertsQuery.refetch();
           }}
         />

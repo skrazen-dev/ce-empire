@@ -1,8 +1,6 @@
-import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
-import { accountOrders, accounts, riskAlerts } from "../../drizzle/schema";
-import { getDb } from "../db";
 import { protectedProcedure, router } from "../_core/trpc";
+import { supabaseAdmin } from "../supabase";
 import {
   analyzeAccountRisk,
   formatRiskAlertForTelegram,
@@ -13,41 +11,45 @@ import {
 
 async function getAccountWithOrders(
   accountId: number,
-  userId: number
+  userId: string | number
 ): Promise<AccountInfo | null> {
-  const db = await getDb();
-  if (!db) return null;
+  try {
+    const { data: account, error: accountError } = await supabaseAdmin
+      .from("accounts")
+      .select("*")
+      .eq("id", accountId)
+      .eq("user_id", userId)
+      .single();
 
-  const [account] = await db
-    .select()
-    .from(accounts)
-    .where(and(eq(accounts.id, accountId), eq(accounts.userId, userId)))
-    .limit(1);
+    if (accountError || !account) return null;
 
-  if (!account) return null;
+    const { data: orders, error: ordersError } = await supabaseAdmin
+      .from("account_orders")
+      .select("*")
+      .eq("account_id", accountId)
+      .eq("user_id", userId)
+      .order("scheduled_at", { ascending: false });
 
-  const orders = await db
-    .select()
-    .from(accountOrders)
-    .where(
-      and(eq(accountOrders.accountId, accountId), eq(accountOrders.userId, userId))
-    )
-    .orderBy(desc(accountOrders.scheduledAt));
+    if (ordersError) return null;
 
-  return {
-    id: account.id,
-    accountName: account.accountName,
-    accountNumber: account.accountNumber,
-    bankName: account.bankName,
-    balance: parseFloat(account.balance),
-    orders: orders.map((o) => ({
-      id: o.id,
-      amount: parseFloat(o.orderAmount),
-      scheduledAt: o.scheduledAt,
-      completedAt: o.completedAt ?? null,
-      status: o.status,
-    })),
-  };
+    return {
+      id: account.id,
+      accountName: account.account_name,
+      accountNumber: account.account_number,
+      bankName: account.bank_name,
+      balance: parseFloat(account.balance || "0"),
+      orders: (orders || []).map((o: any) => ({
+        id: o.id,
+        amount: parseFloat(o.order_amount || "0"),
+        scheduledAt: o.scheduled_at,
+        completedAt: o.completed_at ?? null,
+        status: o.status,
+      })),
+    };
+  } catch (error) {
+    console.error("[Risk] Failed to get account with orders:", error);
+    return null;
+  }
 }
 
 async function sendTelegramAlert(
@@ -64,12 +66,14 @@ async function sendTelegramAlert(
         body: JSON.stringify({
           chat_id: chatId,
           text,
-          parse_mode: "Markdown",
+          parse_mode: "HTML",
         }),
       }
     );
+
     return res.ok;
-  } catch {
+  } catch (error) {
+    console.error("[Risk] Failed to send Telegram alert:", error);
     return false;
   }
 }
@@ -77,268 +81,122 @@ async function sendTelegramAlert(
 // ─── Risk Router ──────────────────────────────────────────────────────────────
 
 export const riskRouter = router({
-  /** วิเคราะห์ความเสี่ยงบัญชีเดียว (พร้อม optional incoming order time) */
-  analyzeAccount: protectedProcedure
-    .input(
-      z.object({
-        accountId: z.number().int().positive(),
-        incomingOrderTime: z.date().optional(),
-        incomingOrderAmount: z.number().optional(),
-      })
-    )
-    .query(async ({ ctx, input }) => {
-      const db = await getDb();
-      if (!db) throw new Error("Database not available");
-
-      const accountInfo = await getAccountWithOrders(
-        input.accountId,
-        ctx.user.id
-      );
-      if (!accountInfo) throw new Error("Account not found");
-
-      // ถ้ามีออเดอร์ใหม่ที่กำลังจะเข้า ให้เพิ่มเข้าไปใน simulation
-      if (input.incomingOrderAmount) {
-        accountInfo.orders.push({
-          id: -1,
-          amount: input.incomingOrderAmount,
-          scheduledAt: input.incomingOrderTime ?? new Date(),
-          status: "pending",
-        });
-      }
-
-      return analyzeAccountRisk(accountInfo, input.incomingOrderTime);
-    }),
-
-  /** วิเคราะห์ความเสี่ยงทุกบัญชีของ user */
-  analyzeAll: protectedProcedure.query(async ({ ctx }) => {
-    const db = await getDb();
-    if (!db) return [];
-
-    const userAccounts = await db
-      .select()
-      .from(accounts)
-      .where(and(eq(accounts.userId, ctx.user.id), eq(accounts.isActive, "yes")));
-
-    const results = await Promise.all(
-      userAccounts.map(async (acc) => {
-        const info = await getAccountWithOrders(acc.id, ctx.user.id);
-        if (!info) return null;
-        return analyzeAccountRisk(info);
-      })
-    );
-
-    return results.filter(Boolean);
-  }),
-
-  /** บันทึก order ใหม่ที่กำลังจะเข้าบัญชี */
-  addOrder: protectedProcedure
-    .input(
-      z.object({
-        accountId: z.number().int().positive(),
-        orderAmount: z.number().positive(),
-        scheduledAt: z.date(),
-        telegramGroup: z.string().optional(),
-        note: z.string().optional(),
-      })
-    )
-    .mutation(async ({ ctx, input }) => {
-      const db = await getDb();
-      if (!db) throw new Error("Database not available");
-
-      const result = await db.insert(accountOrders).values({
-        userId: ctx.user.id,
-        accountId: input.accountId,
-        orderAmount: input.orderAmount.toString(),
-        scheduledAt: input.scheduledAt,
-        telegramGroup: input.telegramGroup,
-        note: input.note,
-        status: "pending",
-      });
-
-      const [inserted] = await db
-        .select()
-        .from(accountOrders)
-        .where(eq(accountOrders.id, result[0].insertId))
-        .limit(1);
-
-      // วิเคราะห์ความเสี่ยงหลังเพิ่มออเดอร์
-      const accountInfo = await getAccountWithOrders(input.accountId, ctx.user.id);
-      if (accountInfo) {
-        const riskResult = analyzeAccountRisk(accountInfo, input.scheduledAt);
-
-        // บันทึก risk alert ถ้าเสี่ยงสูง
-        if (riskResult.shouldNotify) {
-          const highFactors = riskResult.factors.filter(
-            (f) => f.level === "high" || f.level === "critical"
-          );
-          for (const factor of highFactors) {
-            await db.insert(riskAlerts).values({
-              userId: ctx.user.id,
-              accountId: input.accountId,
-              riskLevel: factor.level,
-              riskType: factor.type,
-              message: factor.message,
-              details: factor.details,
-            });
-          }
-        }
-
-        return { order: inserted, risk: riskResult };
-      }
-
-      return { order: inserted, risk: null };
-    }),
-
-  /** อัปเดตสถานะออเดอร์ (completed/cancelled) */
-  updateOrderStatus: protectedProcedure
-    .input(
-      z.object({
-        orderId: z.number().int().positive(),
-        status: z.enum(["completed", "cancelled"]),
-      })
-    )
-    .mutation(async ({ ctx, input }) => {
-      const db = await getDb();
-      if (!db) throw new Error("Database not available");
-
-      await db
-        .update(accountOrders)
-        .set({
-          status: input.status,
-          completedAt: input.status === "completed" ? new Date() : null,
-        })
-        .where(
-          and(
-            eq(accountOrders.id, input.orderId),
-            eq(accountOrders.userId, ctx.user.id)
-          )
-        );
-
-      return { success: true };
-    }),
-
-  /** ดึงรายการ orders ของบัญชี */
-  listOrders: protectedProcedure
-    .input(
-      z.object({
-        accountId: z.number().int().positive(),
-        limit: z.number().int().min(1).max(100).default(50),
-      })
-    )
-    .query(async ({ ctx, input }) => {
-      const db = await getDb();
-      if (!db) return [];
-
-      return db
-        .select()
-        .from(accountOrders)
-        .where(
-          and(
-            eq(accountOrders.accountId, input.accountId),
-            eq(accountOrders.userId, ctx.user.id)
-          )
-        )
-        .orderBy(desc(accountOrders.scheduledAt))
-        .limit(input.limit);
-    }),
-
-  /** ดึง risk alerts ที่ยังไม่ได้อ่าน */
+  /** ดึงรายการ Risk Alerts */
   listAlerts: protectedProcedure
     .input(
       z.object({
-        unreadOnly: z.boolean().default(false),
-        limit: z.number().int().min(1).max(100).default(50),
+        limit: z.number().default(20),
+        offset: z.number().default(0),
       })
     )
     .query(async ({ ctx, input }) => {
-      const db = await getDb();
-      if (!db) return [];
+      try {
+        const { data, error } = await supabaseAdmin
+          .from("risk_alerts")
+          .select("*")
+          .eq("user_id", ctx.user.id)
+          .order("created_at", { ascending: false })
+          .range(input.offset, input.offset + input.limit - 1);
 
-      const conditions = [eq(riskAlerts.userId, ctx.user.id)];
-      if (input.unreadOnly) {
-        conditions.push(eq(riskAlerts.isRead, "no"));
+        if (error) throw error;
+
+        return (data || []).map((alert: any) => ({
+          id: alert.id,
+          accountId: alert.account_id,
+          riskLevel: alert.risk_level,
+          message: alert.message,
+          isResolved: alert.is_resolved,
+          createdAt: alert.created_at,
+          resolvedAt: alert.resolved_at,
+        }));
+      } catch (error) {
+        console.error("[Risk] Failed to list alerts:", error);
+        return [];
       }
-
-      return db
-        .select()
-        .from(riskAlerts)
-        .where(and(...conditions))
-        .orderBy(desc(riskAlerts.createdAt))
-        .limit(input.limit);
     }),
 
-  /** ทำเครื่องหมาย alert ว่าอ่านแล้ว */
-  markAlertRead: protectedProcedure
-    .input(z.object({ alertId: z.number().int().positive() }))
+  /** วิเคราะห์ Risk สำหรับบัญชี */
+  analyzeAccount: protectedProcedure
+    .input(z.object({ accountId: z.number() }))
     .mutation(async ({ ctx, input }) => {
-      const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      try {
+        const account = await getAccountWithOrders(input.accountId, ctx.user.id);
+        if (!account) throw new Error("Account not found");
 
-      await db
-        .update(riskAlerts)
-        .set({ isRead: "yes" })
-        .where(
-          and(
-            eq(riskAlerts.id, input.alertId),
-            eq(riskAlerts.userId, ctx.user.id)
-          )
-        );
+        const analysis = analyzeAccountRisk(account);
 
-      return { success: true };
+        // บันทึก Alert ถ้า risk level สูง
+        if (analysis.overallLevel !== "low") {
+          const { error } = await supabaseAdmin
+            .from("risk_alerts")
+            .insert({
+              user_id: ctx.user.id,
+              account_id: input.accountId,
+              risk_level: analysis.overallLevel,
+              message: analysis.recommendation,
+              is_resolved: false,
+              created_at: new Date().toISOString(),
+            });
+
+          if (error) console.error("[Risk] Failed to insert alert:", error);
+        }
+
+        return analysis;
+      } catch (error) {
+        console.error("[Risk] Failed to analyze account:", error);
+        throw error;
+      }
     }),
 
-  /** ส่งแจ้งเตือนความเสี่ยงไป Telegram */
-  sendRiskAlert: protectedProcedure
+  /** ส่ง Telegram Alert */
+  sendAlert: protectedProcedure
     .input(
       z.object({
-        accountId: z.number().int().positive(),
-        botToken: z.string().min(1),
-        chatId: z.string().min(1),
-        incomingOrderTime: z.date().optional(),
-        incomingOrderAmount: z.number().optional(),
+        accountId: z.number(),
+        botToken: z.string(),
+        chatId: z.string(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const accountInfo = await getAccountWithOrders(
-        input.accountId,
-        ctx.user.id
-      );
-      if (!accountInfo) throw new Error("Account not found");
+      try {
+        const account = await getAccountWithOrders(input.accountId, ctx.user.id);
+        if (!account) throw new Error("Account not found");
 
-      if (input.incomingOrderAmount) {
-        accountInfo.orders.push({
-          id: -1,
-          amount: input.incomingOrderAmount,
-          scheduledAt: input.incomingOrderTime ?? new Date(),
-          status: "pending",
-        });
+        const analysis = analyzeAccountRisk(account);
+        const message = formatRiskAlertForTelegram(analysis);
+
+        const success = await sendTelegramAlert(
+          input.botToken,
+          input.chatId,
+          message
+        );
+
+        return { success };
+      } catch (error) {
+        console.error("[Risk] Failed to send alert:", error);
+        throw error;
       }
+    }),
 
-      const riskResult = analyzeAccountRisk(accountInfo, input.incomingOrderTime);
-      const message = formatRiskAlertForTelegram(riskResult);
-      const sent = await sendTelegramAlert(input.botToken, input.chatId, message);
+  /** ทำเครื่องหมายว่า Alert แก้ไขแล้ว */
+  resolveAlert: protectedProcedure
+    .input(z.object({ alertId: z.number() }))
+    .mutation(async ({ input }) => {
+      try {
+        const { error } = await supabaseAdmin
+          .from("risk_alerts")
+          .update({
+            is_resolved: true,
+            resolved_at: new Date().toISOString(),
+          })
+          .eq("id", input.alertId);
 
-      // บันทึกว่าส่ง Telegram แล้ว
-      if (sent && riskResult.shouldNotify) {
-        const db = await getDb();
-        if (db) {
-          const highFactors = riskResult.factors.filter(
-            (f) => f.level === "high" || f.level === "critical"
-          );
-          for (const factor of highFactors) {
-            await db.insert(riskAlerts).values({
-              userId: ctx.user.id,
-              accountId: input.accountId,
-              riskLevel: factor.level,
-              riskType: factor.type,
-              message: factor.message,
-              details: factor.details,
-              telegramSent: "yes",
-            });
-          }
-        }
+        if (error) throw error;
+
+        return { success: true };
+      } catch (error) {
+        console.error("[Risk] Failed to resolve alert:", error);
+        throw error;
       }
-
-      return { success: sent, risk: riskResult, message };
     }),
 });

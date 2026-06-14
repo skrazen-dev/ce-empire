@@ -145,3 +145,15 @@
 - [x] Tests: 29/29 passed
 - [x] Checkpoint saved
 
+
+## Custom Auth System (Replace Manus OAuth) - COMPLETED
+- [x] สร้าง users table ใน Supabase (username, email, password_hash, role, created_at)
+- [x] สร้าง server/auth.ts - password hashing (bcrypt) + JWT helpers
+- [x] สร้าง auth.login, auth.register, auth.logout tRPC procedures ใน server/routers/auth.ts
+- [x] สร้าง LoginPage component (username/password form) - สวย + responsive
+- [x] สร้าง useCustomAuth hook - เปลี่ยน auth flow
+- [x] Update App.tsx - redirect ไป LoginPage ถ้ายังไม่ login
+- [x] Skeleton Loading มีอยู่แล้ว ใน AccountsPage + ExpensesPage
+- [x] PageTransition component มีอยู่แล้ว
+- [x] bcrypt + jsonwebtoken installed
+- [x] Checkpoint

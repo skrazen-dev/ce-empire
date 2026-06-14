@@ -1,6 +1,7 @@
 import { CreditCard, TrendingUp, TrendingDown, Receipt, DollarSign, Zap, BarChart3, CheckCircle2 } from 'lucide-react';
 import { money } from '@/lib/format';
 import PinnedAccountsWidget from '@/components/PinnedAccountsWidget';
+import MegaDashboard from '@/components/MegaDashboard';
 import { trpc } from '@/lib/trpc';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMemo } from 'react';
@@ -37,6 +38,11 @@ function MiniBarChart({ data, color, valueKey = 'amount' }: { data: any[]; color
 }
 
 export default function DashboardPage() {
+  // Show MegaDashboard as main view
+  return <MegaDashboard />;
+}
+
+export function DashboardPageLegacy() {
   const { data: accounts = [] } = trpc.accounts.list.useQuery();
   const { data: expenses = [] } = trpc.expenses.list.useQuery();
   const { data: summary, isLoading } = trpc.analytics.getSummaryToday.useQuery();

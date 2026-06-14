@@ -1,53 +1,50 @@
-import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 import type { Express, Request, Response } from "express";
-import { upsertUserSb } from "../db-supabase";
-import { getSessionCookieOptions } from "./cookies";
-import { sdk } from "./sdk";
+import { setAuthCookie } from "./sdk";
 
-function getQueryParam(req: Request, key: string): string | undefined {
-  const value = req.query[key];
-  return typeof value === "string" ? value : undefined;
-}
+/**
+ * OAuth routes (disabled - using Custom Auth instead)
+ * Kept for backward compatibility
+ */
 
 export function registerOAuthRoutes(app: Express) {
+  // OAuth callback endpoint (disabled)
   app.get("/api/oauth/callback", async (req: Request, res: Response) => {
-    const code = getQueryParam(req, "code");
-    const state = getQueryParam(req, "state");
+    res.status(400).json({ error: "OAuth is disabled. Use /api/auth/login instead." });
+  });
 
-    if (!code || !state) {
-      res.status(400).json({ error: "code and state are required" });
-      return;
-    }
-
+  // Login endpoint (for Custom Auth)
+  app.post("/api/auth/login", async (req: Request, res: Response) => {
     try {
-      const tokenResponse = await sdk.exchangeCodeForToken(code, state);
-      const userInfo = await sdk.getUserInfo(tokenResponse.accessToken);
+      const { username, password } = req.body;
 
-      if (!userInfo.openId) {
-        res.status(400).json({ error: "openId missing from user info" });
+      if (!username || !password) {
+        res.status(400).json({ error: "Username and password required" });
         return;
       }
 
-      await upsertUserSb({
-        openId: userInfo.openId,
-        name: userInfo.name || null,
-        email: userInfo.email ?? null,
-        loginMethod: userInfo.loginMethod ?? userInfo.platform ?? null,
-        lastSignedIn: new Date(),
-      } as Parameters<typeof upsertUserSb>[0]);
-
-      const sessionToken = await sdk.createSessionToken(userInfo.openId, {
-        name: userInfo.name || "",
-        expiresInMs: ONE_YEAR_MS,
-      });
-
-      const cookieOptions = getSessionCookieOptions(req);
-      res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
-
-      res.redirect(302, "/");
+      // This is handled by tRPC procedure (auth.login)
+      // This endpoint is just a placeholder
+      res.status(400).json({ error: "Use tRPC auth.login procedure instead" });
     } catch (error) {
-      console.error("[OAuth] Callback failed", error);
-      res.status(500).json({ error: "OAuth callback failed" });
+      console.error("[Auth] Login failed:", error);
+      res.status(500).json({ error: "Login failed" });
+    }
+  });
+
+  // Logout endpoint
+  app.post("/api/auth/logout", async (req: Request, res: Response) => {
+    try {
+      // Clear auth cookie
+      res.clearCookie("auth_token", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+      });
+      res.json({ success: true });
+    } catch (error) {
+      console.error("[Auth] Logout failed:", error);
+      res.status(500).json({ error: "Logout failed" });
     }
   });
 }

@@ -118,10 +118,9 @@ function mapSettings(row: Record<string, unknown>): Settings {
 function mapUser(row: Record<string, unknown>): User {
   return {
     id: row.id as number,
-    openId: row.open_id as string,
-    name: (row.name as string | null) ?? null,
-    email: (row.email as string | null) ?? null,
-    loginMethod: (row.login_method as string | null) ?? null,
+    username: (row.username as string | null) ?? "",
+    email: (row.email as string | null) ?? "",
+    passwordHash: (row.password_hash as string | null) ?? "",
     role: (row.role as "user" | "admin") ?? "user",
     createdAt: new Date(row.created_at as string),
     updatedAt: new Date(row.updated_at as string),
@@ -132,21 +131,20 @@ function mapUser(row: Record<string, unknown>): User {
 // ─── Users ────────────────────────────────────────────────────────────────────
 
 export async function upsertUserSb(user: InsertUser): Promise<void> {
-  const role = user.role ?? (user.openId === ENV.ownerOpenId ? "admin" : "user");
+  const role = user.role ?? "user";
 
   const { error } = await supabaseAdmin
     .from("users")
     .upsert(
       {
-        open_id: user.openId,
-        name: user.name ?? null,
+        username: user.username ?? null,
         email: user.email ?? null,
-        login_method: user.loginMethod ?? null,
+        password_hash: user.passwordHash ?? null,
         role,
         last_signed_in: (user.lastSignedIn ?? new Date()).toISOString(),
         updated_at: new Date().toISOString(),
       },
-      { onConflict: "open_id" }
+      { onConflict: "username" }
     );
 
   if (error) {
@@ -155,11 +153,11 @@ export async function upsertUserSb(user: InsertUser): Promise<void> {
   }
 }
 
-export async function getUserByOpenIdSb(openId: string): Promise<User | undefined> {
+export async function getUserByUsernameSb(username: string): Promise<User | undefined> {
   const { data, error } = await supabaseAdmin
     .from("users")
     .select("*")
-    .eq("open_id", openId)
+    .eq("username", username)
     .limit(1)
     .single();
 

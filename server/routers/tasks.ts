@@ -1,8 +1,6 @@
 import { protectedProcedure } from "../_core/trpc";
 import { z } from "zod";
-import { getDb } from "../db";
-import { tasks, projects, taskAssignments } from "../../drizzle/schema";
-import { eq, and } from "drizzle-orm";
+import { supabaseAdmin } from "../supabase";
 
 /**
  * Tasks Router
@@ -11,54 +9,140 @@ import { eq, and } from "drizzle-orm";
 
 export const tasksRouter = {
   /**
-   * Get all projects for current user
+   * Get active tasks for current user (for MegaDashboard)
    */
-  getProjects: protectedProcedure.query(async ({ ctx }) => {
-    const db = await getDb();
-    if (!db) throw new Error("Database not available");
+  getMyActiveTasks: protectedProcedure.query(async ({ ctx }) => {
+    try {
+      const { data, error } = await supabaseAdmin
+        .from("tasks")
+        .select("*")
+        .eq("user_id", ctx.user.id)
+        .neq("status", "done")
+        .order("created_at", { ascending: false })
+        .limit(10);
 
-    const userProjects = await db
-      .select()
-      .from(projects)
-      .where(eq(projects.userId, ctx.user.id));
+      if (error) throw error;
 
-    return userProjects.map((p) => ({
-      id: p.id,
-      name: p.name,
-      description: p.description,
-      status: p.status,
-      color: p.color,
-      displayOrder: p.displayOrder,
-      createdAt: p.createdAt,
-    }));
+      return (data || []).map((task: any) => ({
+        id: task.id,
+        title: task.title,
+        description: task.description,
+        priority: task.priority,
+        status: task.status,
+        dueDate: task.due_date,
+        createdAt: task.created_at,
+      }));
+    } catch (error) {
+      console.error("[Tasks] Failed to get active tasks:", error);
+      return [];
+    }
   }),
 
   /**
-   * Get all tasks for a project (grouped by status)
+   * Complete task (for MegaDashboard)
    */
-  getTasksByProject: protectedProcedure
+  completeTask: protectedProcedure
+    .input(z.object({ taskId: z.union([z.string(), z.number()]) }))
+    .mutation(async ({ ctx, input }) => {
+      try {
+        const { data, error } = await supabaseAdmin
+          .from("tasks")
+          .update({ status: "done", updated_at: new Date().toISOString() })
+          .eq("id", input.taskId)
+          .eq("user_id", ctx.user.id)
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        return {
+          id: data.id,
+          title: data.title,
+          status: data.status,
+        };
+      } catch (error) {
+        console.error("[Tasks] Failed to complete task:", error);
+        throw error;
+      }
+    }),
+
+  /**
+   * Get all projects for current user
+   */
+  getProjects: protectedProcedure.query(async ({ ctx }) => {
+    try {
+      const { data, error } = await supabaseAdmin
+        .from("projects")
+        .select("*")
+        .eq("user_id", ctx.user.id);
+
+      if (error) throw error;
+
+      return (data || []).map((p: any) => ({
+        id: p.id,
+        name: p.name,
+        description: p.description,
+        status: p.status,
+        color: p.color,
+      }));
+    } catch (error) {
+      console.error("[Tasks] Failed to get projects:", error);
+      throw error;
+    }
+  }),
+
+  /**
+   * Get tasks for a project
+   */
+  getProjectTasks: protectedProcedure
     .input(z.object({ projectId: z.number() }))
     .query(async ({ ctx, input }) => {
-      const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      try {
+        const { data: projectTasks, error } = await supabaseAdmin
+          .from("tasks")
+          .select("*")
+          .eq("project_id", input.projectId)
+          .eq("user_id", ctx.user.id);
 
-      const projectTasks = await db
-        .select()
-        .from(tasks)
-        .where(and(eq(tasks.projectId, input.projectId), eq(tasks.userId, ctx.user.id)));
+        if (error) throw error;
 
-      // Group by status
-      const grouped = {
-        todo: projectTasks.filter((t) => t.status === "todo"),
-        in_progress: projectTasks.filter((t) => t.status === "in_progress"),
-        done: projectTasks.filter((t) => t.status === "done"),
-      };
+        // Group by status
+        const grouped = {
+          todo: (projectTasks || []).filter((t: any) => t.status === "todo"),
+          in_progress: (projectTasks || []).filter((t: any) => t.status === "in_progress"),
+          done: (projectTasks || []).filter((t: any) => t.status === "done"),
+        };
 
-      return {
-        todo: grouped.todo.map((t) => formatTask(t)),
-        in_progress: grouped.in_progress.map((t) => formatTask(t)),
-        done: grouped.done.map((t) => formatTask(t)),
-      };
+        return {
+          todo: grouped.todo.map((t: any) => ({
+            id: t.id,
+            title: t.title,
+            description: t.description,
+            status: t.status,
+            priority: t.priority,
+            dueDate: t.due_date,
+          })),
+          in_progress: grouped.in_progress.map((t: any) => ({
+            id: t.id,
+            title: t.title,
+            description: t.description,
+            status: t.status,
+            priority: t.priority,
+            dueDate: t.due_date,
+          })),
+          done: grouped.done.map((t: any) => ({
+            id: t.id,
+            title: t.title,
+            description: t.description,
+            status: t.status,
+            priority: t.priority,
+            dueDate: t.due_date,
+          })),
+        };
+      } catch (error) {
+        console.error("[Tasks] Failed to get project tasks:", error);
+        throw error;
+      }
     }),
 
   /**
@@ -70,32 +154,38 @@ export const tasksRouter = {
         projectId: z.number(),
         title: z.string().min(1),
         description: z.string().optional(),
-        priority: z.enum(["low", "medium", "high", "urgent"]).default("medium"),
-        dueDate: z.date().optional(),
-        assignedTo: z.number().optional(),
+        priority: z.enum(["low", "medium", "high"]).default("medium"),
+        dueDate: z.string().optional(),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const db = await getDb();
-      if (!db) throw new Error("Database not available");
+      try {
+        const { data, error } = await supabaseAdmin
+          .from("tasks")
+          .insert({
+            project_id: input.projectId,
+            user_id: ctx.user.id,
+            title: input.title,
+            description: input.description,
+            priority: input.priority,
+            due_date: input.dueDate,
+            status: "todo",
+            created_at: new Date().toISOString(),
+          })
+          .select()
+          .single();
 
-      const result = await db.insert(tasks).values({
-        projectId: input.projectId,
-        userId: ctx.user.id,
-        title: input.title,
-        description: input.description,
-        priority: input.priority,
-        dueDate: input.dueDate,
-        assignedTo: input.assignedTo,
-        status: "todo",
-        displayOrder: 0,
-      });
+        if (error) throw error;
 
-      return { id: result[0] };
+        return data;
+      } catch (error) {
+        console.error("[Tasks] Failed to create task:", error);
+        throw error;
+      }
     }),
 
   /**
-   * Update task status (for Kanban drag-drop)
+   * Update task status
    */
   updateTaskStatus: protectedProcedure
     .input(
@@ -104,49 +194,23 @@ export const tasksRouter = {
         status: z.enum(["todo", "in_progress", "done"]),
       })
     )
-    .mutation(async ({ ctx, input }) => {
-      const db = await getDb();
-      if (!db) throw new Error("Database not available");
+    .mutation(async ({ input }) => {
+      try {
+        const { error } = await supabaseAdmin
+          .from("tasks")
+          .update({
+            status: input.status,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", input.taskId);
 
-      await db
-        .update(tasks)
-        .set({ status: input.status })
-        .where(and(eq(tasks.id, input.taskId), eq(tasks.userId, ctx.user.id)));
+        if (error) throw error;
 
-      return { success: true };
-    }),
-
-  /**
-   * Update task details
-   */
-  updateTask: protectedProcedure
-    .input(
-      z.object({
-        taskId: z.number(),
-        title: z.string().optional(),
-        description: z.string().optional(),
-        priority: z.enum(["low", "medium", "high", "urgent"]).optional(),
-        dueDate: z.date().optional(),
-        assignedTo: z.number().optional(),
-      })
-    )
-    .mutation(async ({ ctx, input }) => {
-      const db = await getDb();
-      if (!db) throw new Error("Database not available");
-
-      const updates: any = {};
-      if (input.title !== undefined) updates.title = input.title;
-      if (input.description !== undefined) updates.description = input.description;
-      if (input.priority !== undefined) updates.priority = input.priority;
-      if (input.dueDate !== undefined) updates.dueDate = input.dueDate;
-      if (input.assignedTo !== undefined) updates.assignedTo = input.assignedTo;
-
-      await db
-        .update(tasks)
-        .set(updates)
-        .where(and(eq(tasks.id, input.taskId), eq(tasks.userId, ctx.user.id)));
-
-      return { success: true };
+        return { success: true };
+      } catch (error) {
+        console.error("[Tasks] Failed to update task status:", error);
+        throw error;
+      }
     }),
 
   /**
@@ -154,65 +218,19 @@ export const tasksRouter = {
    */
   deleteTask: protectedProcedure
     .input(z.object({ taskId: z.number() }))
-    .mutation(async ({ ctx, input }) => {
-      const db = await getDb();
-      if (!db) throw new Error("Database not available");
+    .mutation(async ({ input }) => {
+      try {
+        const { error } = await supabaseAdmin
+          .from("tasks")
+          .delete()
+          .eq("id", input.taskId);
 
-      await db
-        .delete(tasks)
-        .where(and(eq(tasks.id, input.taskId), eq(tasks.userId, ctx.user.id)));
+        if (error) throw error;
 
-      return { success: true };
-    }),
-
-  /**
-   * Get task detail with assignments
-   */
-  getTaskDetail: protectedProcedure
-    .input(z.object({ taskId: z.number() }))
-    .query(async ({ ctx, input }) => {
-      const db = await getDb();
-      if (!db) throw new Error("Database not available");
-
-      const task = await db
-        .select()
-        .from(tasks)
-        .where(and(eq(tasks.id, input.taskId), eq(tasks.userId, ctx.user.id)))
-        .then((rows) => rows[0]);
-
-      if (!task) throw new Error("Task not found");
-
-      const assignments = await db
-        .select()
-        .from(taskAssignments)
-        .where(eq(taskAssignments.taskId, input.taskId));
-
-      return {
-        ...formatTask(task),
-        assignments: assignments.map((a) => ({
-          id: a.id,
-          assignedToUserId: a.assignedToUserId,
-          assignedByUserId: a.assignedByUserId,
-          assignedAt: a.assignedAt,
-          completedAt: a.completedAt,
-        })),
-      };
+        return { success: true };
+      } catch (error) {
+        console.error("[Tasks] Failed to delete task:", error);
+        throw error;
+      }
     }),
 };
-
-// Helper function to format task
-function formatTask(task: typeof tasks.$inferSelect) {
-  return {
-    id: task.id,
-    projectId: task.projectId,
-    title: task.title,
-    description: task.description,
-    status: task.status,
-    priority: task.priority,
-    dueDate: task.dueDate,
-    assignedTo: task.assignedTo,
-    displayOrder: task.displayOrder,
-    createdAt: task.createdAt,
-    updatedAt: task.updatedAt,
-  };
-}

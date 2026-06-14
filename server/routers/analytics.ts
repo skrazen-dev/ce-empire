@@ -99,6 +99,45 @@ export const analyticsRouter = {
     }),
 
   /**
+   * Get deposit trend (7 days) for MegaDashboard
+   */
+  getDepositTrend: protectedProcedure.query(async ({ ctx }) => {
+    try {
+      const userId = ctx.user.id;
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+      const { data, error } = await sb
+        .from('deposit_slips')
+        .select('amount, slip_date')
+        .eq('user_id', userId)
+        .eq('status', 'verified')
+        .gte('slip_date', sevenDaysAgo.toISOString())
+        .order('slip_date', { ascending: true });
+
+      if (error) throw error;
+
+      // Group by date
+      const grouped: Record<string, number> = {};
+      (data || []).forEach((dep: any) => {
+        const date = new Date(dep.slip_date).toLocaleDateString('th-TH', {
+          month: 'short',
+          day: 'numeric',
+        });
+        grouped[date] = (grouped[date] || 0) + parseFloat(dep.amount || '0');
+      });
+
+      return Object.entries(grouped).map(([date, amount]) => ({
+        date,
+        amount: parseFloat(amount.toFixed(2)),
+      }));
+    } catch (error) {
+      console.error('[Analytics] Failed to get deposit trend:', error);
+      return [];
+    }
+  }),
+
+  /**
    * Get summary dashboard data (deposits + USDT + profit today)
    */
   getSummaryToday: protectedProcedure.query(async ({ ctx }) => {

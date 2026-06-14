@@ -8,6 +8,7 @@ import { pinnedRouter } from "./routers/pinned";
 import { grokRouter } from "./routers/grok";
 import { tasksRouter } from "./routers/tasks";
 import { teamRouter } from "./routers/team";
+import { authRouter } from "./routers/auth";
 import { analyticsRouter } from "./routers/analytics";
 import { encryptSensitiveFields, decryptSensitiveFields } from "./crypto";
 import { storagePut } from "./storage";

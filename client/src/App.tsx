@@ -1,4 +1,4 @@
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -18,9 +18,11 @@ import SettingsPage from "@/pages/SettingsPage";
 import BulkCalcPage from "@/pages/BulkCalcPage";
 import RiskAnalysisPage from "@/pages/RiskAnalysisPage";
 import TasksPage from "@/pages/TasksPage";
+import LoginPage from "@/pages/LoginPage";
 
 import LoadingScreen from "@/components/LoadingScreen";
 import { PageTransition } from "@/components/PageTransition";
+import { useCustomAuth } from "@/_core/hooks/useCustomAuth";
 import { useState } from "react";
 
 function PageRenderer() {
@@ -60,6 +62,26 @@ function AppLayout() {
 
 function App() {
   const [loaded, setLoaded] = useState(false);
+  const { isAuthenticated, loading: authLoading } = useCustomAuth();
+
+  if (authLoading) {
+    return <LoadingScreen onComplete={() => {}} />;
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <ErrorBoundary>
+        <ThemeProvider defaultTheme="dark">
+          <SoundProvider>
+            <TooltipProvider>
+              <Toaster />
+              <LoginPage />
+            </TooltipProvider>
+          </SoundProvider>
+        </ThemeProvider>
+      </ErrorBoundary>
+    );
+  }
 
   return (
     <ErrorBoundary>
