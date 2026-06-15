@@ -1,16 +1,9 @@
 /* =========================================================
-   CE EMPIRE — authentication (single authorized user)
+   CE EMPIRE — landing sign-in (single authorized user)
+   Self-contained, client-side check for the static landing.
    Only one account may sign in:  username "BOSS".
-
-   Strategy:
-   1. Try the server session endpoint  POST /api/login  (source of
-      truth: bcrypt-hashed credentials in the database). Used when the
-      site is served by the CE Empire Express server.
-   2. If that endpoint is unreachable (pure-static hosting), fall back to
-      a self-contained check: username must be exactly "BOSS" and the
-      SHA-256 of the password must match the stored digest below. The
-      plaintext password is never stored in this repo.
-
+   The password is never stored in plaintext — only its SHA-256
+   digest is kept here and compared at submit time.
    All other usernames / passwords are rejected.
    ========================================================= */
 (function () {
@@ -22,7 +15,7 @@
 
   function $(id) { return document.getElementById(id); }
 
-  /* ---------- SHA-256 helper (used only by the static fallback) ---------- */
+  /* ---------- SHA-256 helper ---------- */
   async function sha256Hex(str) {
     if (!(window.crypto && window.crypto.subtle)) return null;
     var buf = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
@@ -31,13 +24,18 @@
     }).join('');
   }
 
-  /* ---------- Modal wiring ---------- */
+  async function isAuthorized(username, password) {
+    if (username !== ALLOWED_USER) return false;
+    var hex = await sha256Hex(password);
+    return hex !== null && hex === PASSWORD_SHA256;
+  }
+
+  /* ---------- Sign-in modal ---------- */
   function initModal() {
     var modal = $('loginModal');
     var openBtn = $('enterCta');
     var closeBtn = $('loginClose');
     if (!modal) return;
-
     var lastFocus = null;
 
     function open(ev) {
@@ -63,13 +61,6 @@
     });
   }
 
-  /* ---------- Static fallback check ---------- */
-  async function fallbackCheck(username, password) {
-    if (username !== ALLOWED_USER) return false;
-    var hex = await sha256Hex(password);
-    return hex !== null && hex === PASSWORD_SHA256;
-  }
-
   /* ---------- Form submit ---------- */
   function initForm() {
     var form = $('loginForm');
@@ -81,58 +72,23 @@
       ev.preventDefault();
       if (err) err.textContent = '';
 
-      var username = ($('username') || {}).value || '';
+      var username = (($('username') || {}).value || '').trim();
       var password = ($('password') || {}).value || '';
-      username = username.trim();
 
       if (!username || !password) {
         if (err) err.textContent = 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน';
         return;
       }
 
-      var redirect = form.getAttribute('data-success-url') || 'dashboard.html';
-      if (submitBtn) { submitBtn.disabled = true; }
-
-      // 1) Try server-side session auth (source of truth).
+      if (submitBtn) submitBtn.disabled = true;
       try {
-        var resp = await fetch('/api/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ username: username, password: password })
-        });
-
-        if (resp.ok) {
-          var data = await resp.json().catch(function () { return {}; });
-          if (data && data.user) sessionStorage.setItem('ce_user', data.user);
-          window.location.href = redirect;
-          return;
-        }
-        if (resp.status === 401) {
-          if (err) err.textContent = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
-          if (submitBtn) submitBtn.disabled = false;
-          return;
-        }
-        if (resp.status === 429) {
-          if (err) err.textContent = 'พยายามเข้าสู่ระบบบ่อยเกินไป โปรดรอสักครู่';
-          if (submitBtn) submitBtn.disabled = false;
-          return;
-        }
-        // Other server errors fall through to the static check below.
-      } catch (e) {
-        // Network error / no backend (static hosting) → use fallback.
-      }
-
-      // 2) Static fallback (single authorized account).
-      try {
-        var ok = await fallbackCheck(username, password);
-        if (ok) {
+        if (await isAuthorized(username, password)) {
           sessionStorage.setItem('ce_user', ALLOWED_USER);
-          window.location.href = redirect;
+          window.location.href = form.getAttribute('data-success-url') || 'dashboard.html';
           return;
         }
         if (err) err.textContent = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
-      } catch (e2) {
+      } catch (e) {
         if (err) err.textContent = 'ระบบเกิดข้อผิดพลาด โปรดลองใหม่อีกครั้ง';
       } finally {
         if (submitBtn) submitBtn.disabled = false;
