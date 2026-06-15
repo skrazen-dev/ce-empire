@@ -9,7 +9,7 @@
     .dashboard {padding:28px;max-width:1200px;margin:0 auto;color:var(--muted)}
     .topbar{display:flex;justify-content:space-between;align-items:center}
     .card{background:linear-gradient(180deg,rgba(255,255,255,0.02), rgba(0,0,0,0.12));border:1px solid rgba(255,255,255,0.02);padding:18px;border-radius:10px;margin-top:18px}
-    .logout{background:#222;color:#fff;padding:8px 10px;border-radius:8px;text-decoration:none}
+    .logout{background:#222;color:#fff;padding:8px 10px;border-radius:8px;border:none;cursor:pointer}
   </style>
 </head>
 <body>
@@ -20,7 +20,7 @@
         <div style="color:rgba(255,255,255,0.72)">Welcome, <span id="userName">—</span></div>
       </div>
       <div>
-        <a id="logoutBtn" class="logout" href="#">Log out</a>
+        <button id="logoutBtn" class="logout">Log out</button>
       </div>
     </div>
 
