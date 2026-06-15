@@ -1,0 +1,6 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "echo \"CE Empire landing is prebuilt static (dist/); no build step required.\"",
+  "installCommand": "echo \"No dependencies required for the static landing page.\"",
+  "outputDirectory": "dist"
+}

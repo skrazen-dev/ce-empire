@@ -1,56 +1,103 @@
-// Client-side login handler adapted to use server-side authentication.
-// Sends credentials to POST /api/login and relies on an httpOnly session cookie set by the server.
-// This file no longer validates credentials in the client — it defers to the server.
+/* =========================================================
+   CE EMPIRE — landing sign-in (single authorized user)
+   Self-contained, client-side check for the static landing.
+   Only one account may sign in:  username "BOSS".
+   The password is never stored in plaintext — only its SHA-256
+   digest is kept here and compared at submit time.
+   All other usernames / passwords are rejected.
+   ========================================================= */
+(function () {
+  'use strict';
 
-(function(){
-  const formSelector = '#loginForm';
-  const ALLOWED_USER = 'BOSS'; // still used for UX guidance only
+  var ALLOWED_USER = 'BOSS';
+  // SHA-256 digest of the authorized password (no plaintext in source).
+  var PASSWORD_SHA256 = 'c7356f6e41312ae224620c0782081e501fd078e2b70e72140a28ad2b6dd137fa';
 
-  document.addEventListener('DOMContentLoaded', () => {
-    const form = document.querySelector(formSelector);
+  function $(id) { return document.getElementById(id); }
+
+  /* ---------- SHA-256 helper ---------- */
+  async function sha256Hex(str) {
+    if (!(window.crypto && window.crypto.subtle)) return null;
+    var buf = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+    return Array.prototype.map.call(new Uint8Array(buf), function (b) {
+      return b.toString(16).padStart(2, '0');
+    }).join('');
+  }
+
+  async function isAuthorized(username, password) {
+    if (username !== ALLOWED_USER) return false;
+    var hex = await sha256Hex(password);
+    return hex !== null && hex === PASSWORD_SHA256;
+  }
+
+  /* ---------- Sign-in modal ---------- */
+  function initModal() {
+    var modal = $('loginModal');
+    var openBtn = $('enterCta');
+    var closeBtn = $('loginClose');
+    if (!modal) return;
+    var lastFocus = null;
+
+    function open(ev) {
+      if (ev) ev.preventDefault();
+      lastFocus = document.activeElement;
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden', 'false');
+      var u = $('username');
+      if (u) setTimeout(function () { u.focus(); }, 50);
+    }
+    function close() {
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+      var err = $('loginError'); if (err) err.textContent = '';
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
+    }
+
+    if (openBtn) openBtn.addEventListener('click', open);
+    if (closeBtn) closeBtn.addEventListener('click', close);
+    modal.addEventListener('mousedown', function (e) { if (e.target === modal) close(); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && modal.classList.contains('open')) close();
+    });
+  }
+
+  /* ---------- Form submit ---------- */
+  function initForm() {
+    var form = $('loginForm');
     if (!form) return;
-    const err = document.getElementById('loginError');
+    var err = $('loginError');
+    var submitBtn = $('loginSubmit');
 
-    form.addEventListener('submit', async (ev) => {
+    form.addEventListener('submit', async function (ev) {
       ev.preventDefault();
       if (err) err.textContent = '';
 
-      const u = (document.getElementById('username') || {}).value || '';
-      const p = (document.getElementById('password') || {}).value || '';
+      var username = (($('username') || {}).value || '').trim();
+      var password = ($('password') || {}).value || '';
 
-      // Basic client-side checks to avoid empty submissions
-      if (!u || !p) {
+      if (!username || !password) {
         if (err) err.textContent = 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน';
         return;
       }
 
+      if (submitBtn) submitBtn.disabled = true;
       try {
-        const resp = await fetch('/api/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include', // include httpOnly cookie
-          body: JSON.stringify({ username: u, password: p })
-        });
-
-        if (resp.ok) {
-          // login success — server sets cookie; redirect to dashboard
-          const data = await resp.json();
-          // optional: store a safe display name in sessionStorage
-          if (data && data.user) sessionStorage.setItem('ce_user', data.user);
-          const redirect = form.getAttribute('data-success-url') || 'dashboard.html';
-          window.location.href = redirect;
-        } else if (resp.status === 401) {
-          if (err) err.textContent = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
-        } else if (resp.status === 429) {
-          if (err) err.textContent = 'Too many attempts. Please wait and try again.';
-        } else {
-          if (err) err.textContent = 'ระบบเกิดข้อผิดพลาด โปรดลองใหม่ภายหลัง';
-          console.warn('Login error', resp.status, await resp.text());
+        if (await isAuthorized(username, password)) {
+          sessionStorage.setItem('ce_user', ALLOWED_USER);
+          window.location.href = form.getAttribute('data-success-url') || 'dashboard.html';
+          return;
         }
+        if (err) err.textContent = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
       } catch (e) {
-        console.error('Login request failed', e);
-        if (err) err.textContent = 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้';
+        if (err) err.textContent = 'ระบบเกิดข้อผิดพลาด โปรดลองใหม่อีกครั้ง';
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
       }
     });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    initModal();
+    initForm();
   });
 })();

@@ -36,28 +36,16 @@
   </main>
 
   <script>
-    // Query server for current user; if not authenticated, redirect to landing
+    // Auth guard: rely on the session flag set by the landing sign-in.
     (function(){
-      async function check() {
-        try {
-          const resp = await fetch('/api/me', { credentials: 'include' });
-          if (!resp.ok) {
-            window.location.href = 'index.html';
-            return;
-          }
-          const data = await resp.json();
-          document.getElementById('userName').textContent = data.displayName || data.user;
-          document.getElementById('logoutBtn').addEventListener('click', async function(ev){
-            ev.preventDefault();
-            await fetch('/api/logout', { method: 'POST', credentials: 'include' });
-            window.location.href = 'index.html';
-          });
-        } catch (e) {
-          console.error('auth check failed', e);
-          window.location.href = 'index.html';
-        }
-      }
-      check();
+      var user = sessionStorage.getItem('ce_user');
+      if (!user) { window.location.href = 'index.html'; return; }
+      document.getElementById('userName').textContent = user;
+      document.getElementById('logoutBtn').addEventListener('click', function(ev){
+        ev.preventDefault();
+        sessionStorage.removeItem('ce_user');
+        window.location.href = 'index.html';
+      });
     })();
   </script>
 </body>
