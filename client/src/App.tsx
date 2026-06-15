@@ -17,6 +17,7 @@ import UsdtCalcPage from "@/pages/UsdtCalcPage";
 import SettingsPage from "@/pages/SettingsPage";
 import BulkCalcPage from "@/pages/BulkCalcPage";
 import RiskAnalysisPage from "@/pages/RiskAnalysisPage";
+import AIPage from "@/pages/AI";
 import TasksPage from "@/pages/TasksPage";
 import HistoryPage from "@/pages/HistoryPage";
 import LandingPage from "@/pages/LandingPage";
@@ -40,6 +41,7 @@ function PageRenderer() {
     case 'usdt-calc': content = <UsdtCalcPage />; break;
     case 'bulk-calc': content = <BulkCalcPage />; break;
     case 'risk-analysis': content = <RiskAnalysisPage />; break;
+    case 'ai': content = <AIPage />; break;
     case 'tasks': content = <TasksPage />; break;
     case 'history': content = <HistoryPage />; break;
     case 'settings': content = <SettingsPage />; break;

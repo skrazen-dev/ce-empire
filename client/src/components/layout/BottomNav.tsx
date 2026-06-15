@@ -2,7 +2,7 @@ import { useState } from 'react';
 import {
   LayoutDashboard, Receipt, Users, MoreHorizontal,
   BarChart2, FileText, DollarSign, Settings, Calculator,
-  ClipboardList, X, Home, Clock, Building2, Sparkles
+  ClipboardList, X, Home, Clock, Building2, Sparkles, ShieldAlert
 } from 'lucide-react';
 import { useStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
@@ -18,7 +18,7 @@ const PRIMARY_TABS: { id: PageId; label: string; icon: typeof LayoutDashboard; c
   { id: 'expenses',      label: 'ธุรกรรม',  icon: Receipt,   color: GOLD },
   { id: 'history',       label: 'ประวัติ',   icon: Clock,     color: GOLD },
   { id: 'accounts',      label: 'ธนาคาร',   icon: Building2,  color: GOLD },
-  { id: 'risk-analysis', label: 'AI',        icon: Sparkles,  color: GOLD },
+  { id: 'ai',            label: 'AI',        icon: Sparkles,  color: GOLD },
 ];
 
 // Extra items in "More" drawer
@@ -27,6 +27,7 @@ const MORE_ITEMS: { id: PageId; label: string; icon: typeof LayoutDashboard; col
   { id: 'status',     label: 'วิเคราะห์',   icon: BarChart2,    color: SILVER },
   { id: 'proof',      label: 'เอกสาร',      icon: FileText,     color: SILVER },
   { id: 'tasks',      label: 'จัดการงาน',  icon: ClipboardList, color: SILVER },
+  { id: 'risk-analysis', label: 'ความเสี่ยง', icon: ShieldAlert, color: SILVER },
   { id: 'usdt-calc',  label: 'USDT',        icon: DollarSign,   color: SILVER },
   { id: 'bulk-calc',  label: 'Bulk',        icon: Calculator,   color: SILVER },
   { id: 'settings',   label: 'ตั้งค่า',     icon: Settings,     color: SILVER },

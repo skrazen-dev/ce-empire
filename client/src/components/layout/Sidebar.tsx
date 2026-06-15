@@ -34,13 +34,14 @@ const NAV_GROUPS: NavGroup[] = [
       { id: 'expenses',      label: 'ธุรกรรม',      icon: Receipt,       neonColor: GOLD, neonGlow: GOLD_GLOW },
       { id: 'history',       label: 'ประวัติ',       icon: Clock,         neonColor: GOLD, neonGlow: GOLD_GLOW },
       { id: 'accounts',      label: 'ธนาคาร',       icon: Building2,     neonColor: GOLD, neonGlow: GOLD_GLOW },
-      { id: 'risk-analysis', label: 'AI',            icon: Sparkles,      neonColor: GOLD, neonGlow: GOLD_GLOW },
+      { id: 'ai',            label: 'AI',            icon: Sparkles,      neonColor: GOLD, neonGlow: GOLD_GLOW },
     ]
   },
   {
     group: 'More',
     items: [
       { id: 'agents',        label: 'ทีม',           icon: Users,        neonColor: SILVER, neonGlow: SILVER_GLOW },
+      { id: 'risk-analysis', label: 'ความเสี่ยง',    icon: ShieldAlert,  neonColor: SILVER, neonGlow: SILVER_GLOW },
       { id: 'status',        label: 'วิเคราะห์',     icon: BarChart2,    neonColor: SILVER, neonGlow: SILVER_GLOW },
       { id: 'proof',         label: 'เอกสาร',        icon: FileText,     neonColor: SILVER, neonGlow: SILVER_GLOW },
       { id: 'tasks',         label: 'จัดการงาน',    icon: ClipboardList, neonColor: SILVER, neonGlow: SILVER_GLOW },
