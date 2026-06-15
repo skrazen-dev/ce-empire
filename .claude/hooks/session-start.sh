@@ -11,7 +11,10 @@ fi
 
 cd "$CLAUDE_PROJECT_DIR"
 
-echo "[session-start] Installing Node dependencies (npm install)..."
-npm install --no-audit --no-fund
+# This is a pnpm project (pnpm-lock.yaml + pnpm-workspace.yaml; Vercel installs
+# with pnpm). Use pnpm here too so session deps match CI exactly and we don't
+# churn package-lock.json by running npm.
+echo "[session-start] Installing Node dependencies (pnpm install)..."
+pnpm install
 
 echo "[session-start] Dependencies ready."
