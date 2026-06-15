@@ -1,7 +1,7 @@
 import {
-  LayoutDashboard, CreditCard, Receipt, Users, CheckCircle2,
-  Image, Sparkles, DollarSign, Settings, Calculator, ShieldAlert,
-  Home, BarChart2, FileText, Building2, Bell, UserCircle2, Zap, ClipboardList
+  LayoutDashboard, Receipt, Users,
+  DollarSign, Settings, Calculator, ShieldAlert,
+  Home, BarChart2, FileText, Building2, Clock, ClipboardList, Sparkles
 } from 'lucide-react';
 import { useStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
@@ -20,36 +20,33 @@ interface NavGroup {
   }>;
 }
 
+// Chrome / gold luxury palette — primary nav uses gold accent, secondary uses chrome silver.
+const GOLD = '#D4AF37';
+const GOLD_GLOW = 'rgba(212,175,55,0.5)';
+const SILVER = '#C0C0C0';
+const SILVER_GLOW = 'rgba(192,192,192,0.35)';
+
 const NAV_GROUPS: NavGroup[] = [
   {
-    group: 'Dashboard',
+    group: 'Main',
     items: [
-      { id: 'dashboard',     label: 'หน้าหลัก',     icon: Home,         neonColor: '#00D9FF', neonGlow: 'rgba(0,217,255,0.55)' },
+      { id: 'dashboard',     label: 'หน้าหลัก',     icon: Home,          neonColor: GOLD, neonGlow: GOLD_GLOW },
+      { id: 'expenses',      label: 'ธุรกรรม',      icon: Receipt,       neonColor: GOLD, neonGlow: GOLD_GLOW },
+      { id: 'history',       label: 'ประวัติ',       icon: Clock,         neonColor: GOLD, neonGlow: GOLD_GLOW },
+      { id: 'accounts',      label: 'ธนาคาร',       icon: Building2,     neonColor: GOLD, neonGlow: GOLD_GLOW },
+      { id: 'risk-analysis', label: 'AI',            icon: Sparkles,      neonColor: GOLD, neonGlow: GOLD_GLOW },
     ]
   },
   {
-    group: 'Data Display',
+    group: 'More',
     items: [
-      { id: 'accounts',      label: 'บัญชี',         icon: Building2,    neonColor: '#FF8C42', neonGlow: 'rgba(255,140,66,0.5)' },
-      { id: 'expenses',      label: 'ค่าใช้จ่าย',   icon: Receipt,      neonColor: '#10B981', neonGlow: 'rgba(16,185,129,0.5)' },
-      { id: 'agents',        label: 'Agent',          icon: Users,        neonColor: '#A855F7', neonGlow: 'rgba(168,85,247,0.5)' },
-      { id: 'status',        label: 'สถานะ',         icon: BarChart2,    neonColor: '#06B6D4', neonGlow: 'rgba(6,182,212,0.5)' },
-      { id: 'proof',         label: 'หลักฐาน',       icon: FileText,     neonColor: '#F59E0B', neonGlow: 'rgba(245,158,11,0.5)' },
-      { id: 'tasks',         label: 'จัดการงาน',   icon: ClipboardList, neonColor: '#EC4899', neonGlow: 'rgba(236,72,153,0.5)' },
-    ]
-  },
-  {
-    group: 'Tools',
-    items: [
-      { id: 'usdt-calc',     label: 'คำนวณ USDT',    icon: DollarSign,   neonColor: '#14B8A6', neonGlow: 'rgba(20,184,166,0.5)' },
-      { id: 'bulk-calc',     label: 'Bulk คำนวณ',    icon: Calculator,   neonColor: '#8B5CF6', neonGlow: 'rgba(139,92,246,0.5)' },
-      { id: 'risk-analysis', label: 'ความเสี่ยง',   icon: ShieldAlert,  neonColor: '#EF4444', neonGlow: 'rgba(239,68,68,0.5)' },
-    ]
-  },
-  {
-    group: 'Settings',
-    items: [
-      { id: 'settings',      label: 'ตั้งค่า',       icon: Settings,     neonColor: '#64748B', neonGlow: 'rgba(100,116,139,0.4)' },
+      { id: 'agents',        label: 'ทีม',           icon: Users,        neonColor: SILVER, neonGlow: SILVER_GLOW },
+      { id: 'status',        label: 'วิเคราะห์',     icon: BarChart2,    neonColor: SILVER, neonGlow: SILVER_GLOW },
+      { id: 'proof',         label: 'เอกสาร',        icon: FileText,     neonColor: SILVER, neonGlow: SILVER_GLOW },
+      { id: 'tasks',         label: 'จัดการงาน',    icon: ClipboardList, neonColor: SILVER, neonGlow: SILVER_GLOW },
+      { id: 'usdt-calc',     label: 'คำนวณ USDT',    icon: DollarSign,   neonColor: SILVER, neonGlow: SILVER_GLOW },
+      { id: 'bulk-calc',     label: 'Bulk คำนวณ',    icon: Calculator,   neonColor: SILVER, neonGlow: SILVER_GLOW },
+      { id: 'settings',      label: 'ตั้งค่า',       icon: Settings,     neonColor: SILVER, neonGlow: SILVER_GLOW },
     ]
   },
 ];

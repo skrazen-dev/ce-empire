@@ -12,6 +12,10 @@ interface AppState {
   searchQuery: string;
   setSearchQuery: (q: string) => void;
 
+  // Landing / entry gate
+  enteredApp: boolean;
+  setEnteredApp: (entered: boolean) => void;
+
   accounts: BankAccount[];
   addAccount: (account: Omit<BankAccount, 'id' | 'createdAt' | 'updatedAt'>) => void;
   updateAccount: (id: string, data: Partial<BankAccount>) => void;
@@ -56,6 +60,9 @@ export const useStore = create<AppState>()(
       setPage: (page) => set({ currentPage: page }),
       searchQuery: '',
       setSearchQuery: (q) => set({ searchQuery: q }),
+
+      enteredApp: false,
+      setEnteredApp: (entered) => set({ enteredApp: entered }),
 
       accounts: [],
       addAccount: (account) =>

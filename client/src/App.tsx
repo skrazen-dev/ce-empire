@@ -18,6 +18,8 @@ import SettingsPage from "@/pages/SettingsPage";
 import BulkCalcPage from "@/pages/BulkCalcPage";
 import RiskAnalysisPage from "@/pages/RiskAnalysisPage";
 import TasksPage from "@/pages/TasksPage";
+import HistoryPage from "@/pages/HistoryPage";
+import LandingPage from "@/pages/LandingPage";
 import LoginPage from "@/pages/LoginPage";
 
 import LoadingScreen from "@/components/LoadingScreen";
@@ -39,6 +41,7 @@ function PageRenderer() {
     case 'bulk-calc': content = <BulkCalcPage />; break;
     case 'risk-analysis': content = <RiskAnalysisPage />; break;
     case 'tasks': content = <TasksPage />; break;
+    case 'history': content = <HistoryPage />; break;
     case 'settings': content = <SettingsPage />; break;
     default: content = <DashboardPage />;
   }
@@ -63,6 +66,7 @@ function AppLayout() {
 function App() {
   const [loaded, setLoaded] = useState(false);
   const { isAuthenticated, loading: authLoading } = useCustomAuth();
+  const enteredApp = useStore((s) => s.enteredApp);
 
   if (authLoading) {
     return <LoadingScreen onComplete={() => {}} />;
@@ -91,7 +95,7 @@ function App() {
             <Toaster />
             {!loaded && <LoadingScreen onComplete={() => setLoaded(true)} />}
             <div className={`transition-opacity duration-500 ${loaded ? 'opacity-100' : 'opacity-0'}`}>
-              <AppLayout />
+              {enteredApp ? <AppLayout /> : <LandingPage />}
             </div>
           </TooltipProvider>
         </SoundProvider>

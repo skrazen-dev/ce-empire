@@ -1,31 +1,35 @@
 import { useState } from 'react';
 import {
-  LayoutDashboard, CreditCard, Receipt, Users, MoreHorizontal,
-  CheckCircle2, Image, DollarSign, Settings, Calculator, ShieldAlert,
-  ClipboardList, X
+  LayoutDashboard, Receipt, Users, MoreHorizontal,
+  BarChart2, FileText, DollarSign, Settings, Calculator,
+  ClipboardList, X, Home, Clock, Building2, Sparkles
 } from 'lucide-react';
 import { useStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
 import type { PageId } from '@/lib/types';
 import { useSound } from '@/contexts/SoundContext';
 
-// 5 primary tabs shown always
+const GOLD = '#D4AF37';
+const SILVER = '#C0C0C0';
+
+// 5 primary tabs shown always — Home, Transactions, History, Banks, AI
 const PRIMARY_TABS: { id: PageId; label: string; icon: typeof LayoutDashboard; color: string }[] = [
-  { id: 'dashboard',  label: 'หน้าหลัก', icon: LayoutDashboard, color: '#00D4FF' },
-  { id: 'accounts',   label: 'บัญชี',    icon: CreditCard,       color: '#FF8C42' },
-  { id: 'expenses',   label: 'รายจ่าย',  icon: Receipt,          color: '#10B981' },
-  { id: 'agents',     label: 'Agent',    icon: Users,            color: '#A855F7' },
-  { id: 'tasks',      label: 'งาน',      icon: ClipboardList,    color: '#EC4899' },
+  { id: 'dashboard',     label: 'หน้าหลัก', icon: Home,      color: GOLD },
+  { id: 'expenses',      label: 'ธุรกรรม',  icon: Receipt,   color: GOLD },
+  { id: 'history',       label: 'ประวัติ',   icon: Clock,     color: GOLD },
+  { id: 'accounts',      label: 'ธนาคาร',   icon: Building2,  color: GOLD },
+  { id: 'risk-analysis', label: 'AI',        icon: Sparkles,  color: GOLD },
 ];
 
 // Extra items in "More" drawer
 const MORE_ITEMS: { id: PageId; label: string; icon: typeof LayoutDashboard; color: string }[] = [
-  { id: 'status',        label: 'สถานะ',      icon: CheckCircle2, color: '#06B6D4' },
-  { id: 'proof',         label: 'หลักฐาน',    icon: Image,        color: '#F59E0B' },
-  { id: 'usdt-calc',     label: 'USDT',       icon: DollarSign,   color: '#14B8A6' },
-  { id: 'bulk-calc',     label: 'Bulk',       icon: Calculator,   color: '#8B5CF6' },
-  { id: 'risk-analysis', label: 'ความเสี่ยง', icon: ShieldAlert,  color: '#EF4444' },
-  { id: 'settings',      label: 'ตั้งค่า',    icon: Settings,     color: '#64748B' },
+  { id: 'agents',     label: 'ทีม',         icon: Users,        color: SILVER },
+  { id: 'status',     label: 'วิเคราะห์',   icon: BarChart2,    color: SILVER },
+  { id: 'proof',      label: 'เอกสาร',      icon: FileText,     color: SILVER },
+  { id: 'tasks',      label: 'จัดการงาน',  icon: ClipboardList, color: SILVER },
+  { id: 'usdt-calc',  label: 'USDT',        icon: DollarSign,   color: SILVER },
+  { id: 'bulk-calc',  label: 'Bulk',        icon: Calculator,   color: SILVER },
+  { id: 'settings',   label: 'ตั้งค่า',     icon: Settings,     color: SILVER },
 ];
 
 export function BottomNav() {

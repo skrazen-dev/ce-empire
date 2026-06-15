@@ -1,7 +1,7 @@
 import {
-  LayoutDashboard, CreditCard, Receipt, Users, CheckCircle2, Image, X,
-  DollarSign, Calculator, ShieldAlert, Settings, ClipboardList,
-  Home, BarChart2, FileText, Building2
+  LayoutDashboard, Receipt, Users, X,
+  DollarSign, Calculator, Settings, ClipboardList,
+  Home, BarChart2, FileText, Building2, Clock, Sparkles
 } from 'lucide-react';
 import { useStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
@@ -16,40 +16,32 @@ interface NavGroup {
   items: Array<{ id: PageId; label: string; icon: typeof LayoutDashboard; color: string }>;
 }
 
+const GOLD = '#D4AF37';
+const SILVER = '#C0C0C0';
+
 const NAV_GROUPS: NavGroup[] = [
   {
-    group: 'Dashboard',
-    color: '#00D9FF',
+    group: 'Main',
+    color: GOLD,
     items: [
-      { id: 'dashboard', label: 'หน้าหลัก', icon: Home, color: '#00D9FF' },
+      { id: 'dashboard',     label: 'หน้าหลัก', icon: Home,      color: GOLD },
+      { id: 'expenses',      label: 'ธุรกรรม',  icon: Receipt,   color: GOLD },
+      { id: 'history',       label: 'ประวัติ',   icon: Clock,     color: GOLD },
+      { id: 'accounts',      label: 'ธนาคาร',   icon: Building2,  color: GOLD },
+      { id: 'risk-analysis', label: 'AI',        icon: Sparkles,  color: GOLD },
     ]
   },
   {
-    group: 'Data Display',
-    color: '#FF8C42',
+    group: 'More',
+    color: SILVER,
     items: [
-      { id: 'accounts',      label: 'บัญชี',       icon: Building2,    color: '#FF8C42' },
-      { id: 'expenses',      label: 'ค่าใช้จ่าย',  icon: Receipt,      color: '#10B981' },
-      { id: 'agents',        label: 'Agent',        icon: Users,        color: '#A855F7' },
-      { id: 'status',        label: 'สถานะ',        icon: BarChart2,    color: '#06B6D4' },
-      { id: 'proof',         label: 'หลักฐาน',      icon: FileText,     color: '#F59E0B' },
-      { id: 'tasks',         label: 'จัดการงาน',   icon: ClipboardList, color: '#EC4899' },
-    ]
-  },
-  {
-    group: 'Tools',
-    color: '#14B8A6',
-    items: [
-      { id: 'usdt-calc',     label: 'คำนวณ USDT',   icon: DollarSign,  color: '#14B8A6' },
-      { id: 'bulk-calc',     label: 'Bulk คำนวณ',   icon: Calculator,  color: '#8B5CF6' },
-      { id: 'risk-analysis', label: 'ความเสี่ยง',   icon: ShieldAlert, color: '#EF4444' },
-    ]
-  },
-  {
-    group: 'Settings',
-    color: '#64748B',
-    items: [
-      { id: 'settings', label: 'ตั้งค่า', icon: Settings, color: '#64748B' },
+      { id: 'agents',        label: 'ทีม',         icon: Users,         color: SILVER },
+      { id: 'status',        label: 'วิเคราะห์',   icon: BarChart2,     color: SILVER },
+      { id: 'proof',         label: 'เอกสาร',      icon: FileText,      color: SILVER },
+      { id: 'tasks',         label: 'จัดการงาน',  icon: ClipboardList, color: SILVER },
+      { id: 'usdt-calc',     label: 'คำนวณ USDT',  icon: DollarSign,    color: SILVER },
+      { id: 'bulk-calc',     label: 'Bulk คำนวณ',  icon: Calculator,    color: SILVER },
+      { id: 'settings',      label: 'ตั้งค่า',     icon: Settings,      color: SILVER },
     ]
   },
 ];
