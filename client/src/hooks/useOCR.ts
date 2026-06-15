@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import Tesseract from "tesseract.js";
+import { parseSlipText } from "@/lib/slip-ocr";
 
 export type OCRMode = "idcard" | "slip";
 
@@ -13,6 +14,8 @@ export interface IDCardData {
 
 export interface SlipData {
   amount: string;
+  /** ธนาคารที่ตรวจพบจากสลิป (เพิ่มจาก slip-ocr heuristics) */
+  bank: string;
   date: string;
   time: string;
   senderName: string;
@@ -115,41 +118,31 @@ function parseIDCard(text: string): IDCardData {
   return { idNumber, firstName, lastName, dateOfBirth, rawText: text };
 }
 
-// Parse bank slip / PromptPay text
+// Parse bank slip / PromptPay text — ใช้ heuristics กลางจาก lib/slip-ocr
+// (Amount, Bank, Date, Time, Reference) แล้วเสริม sender/receiver เฉพาะที่นี่
 function parseSlip(text: string): SlipData {
-  const lines = text
+  const base = parseSlipText(text);
+
+  const fullText = text
     .split("\n")
     .map((l) => l.trim())
-    .filter(Boolean);
-  const fullText = lines.join(" ");
+    .filter(Boolean)
+    .join(" ");
 
-  // Extract amount (Thai baht patterns)
-  const amountMatch = fullText.match(/(?:จำนวน|Amount|ยอด)[:\s]*([0-9,]+\.?\d*)\s*(?:บาท|THB|฿)?/i) ||
-    fullText.match(/([0-9,]+\.\d{2})\s*(?:บาท|THB|฿)/i) ||
-    fullText.match(/฿\s*([0-9,]+\.?\d*)/);
-  const amount = amountMatch ? amountMatch[1].replace(/,/g, "") : "";
-
-  // Extract date
-  const dateMatch = fullText.match(/(\d{1,2}[\/\-\.]\d{1,2}[\/\-\.]\d{2,4})/);
-  const date = dateMatch ? dateMatch[1] : "";
-
-  // Extract time
-  const timeMatch = fullText.match(/(\d{1,2}:\d{2}(?::\d{2})?)/);
-  const time = timeMatch ? timeMatch[1] : "";
-
-  // Extract reference number
-  const refMatch = fullText.match(/(?:เลขที่อ้างอิง|Ref(?:erence)?|รหัส)[:\s]*([A-Z0-9]{6,20})/i) ||
-    fullText.match(/\b([A-Z0-9]{10,20})\b/);
-  const referenceNumber = refMatch ? refMatch[1] : "";
-
-  // Extract sender/receiver names
+  // Extract sender/receiver names (เฉพาะ useOCR — ไม่อยู่ในฟิลด์มาตรฐานของสลิป)
   const senderMatch = fullText.match(/(?:จาก|From|ผู้โอน)[:\s]+([ก-๙a-zA-Z\s]+?)(?:\s+(?:ไป|To|ผู้รับ)|$)/i);
   const receiverMatch = fullText.match(/(?:ถึง|To|ผู้รับ)[:\s]+([ก-๙a-zA-Z\s]+?)(?:\s|$)/i);
 
-  const senderName = senderMatch ? senderMatch[1].trim() : "";
-  const receiverName = receiverMatch ? receiverMatch[1].trim() : "";
-
-  return { amount, date, time, senderName, receiverName, referenceNumber, rawText: text };
+  return {
+    amount: base.amount,
+    bank: base.bank,
+    date: base.date,
+    time: base.time,
+    senderName: senderMatch ? senderMatch[1].trim() : "",
+    receiverName: receiverMatch ? receiverMatch[1].trim() : "",
+    referenceNumber: base.reference,
+    rawText: base.rawText,
+  };
 }
 
 export function useOCR() {

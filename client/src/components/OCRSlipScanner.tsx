@@ -192,6 +192,17 @@ export function OCRSlipScanner({ open, onClose, onConfirm }: OCRSlipScannerProps
                   </div>
                 </div>
 
+                {/* ธนาคารที่ตรวจพบ (จาก slip-ocr heuristics) */}
+                <div className="space-y-1">
+                  <Label className="text-xs text-white/50">ธนาคาร</Label>
+                  <Input
+                    value={editData.bank}
+                    onChange={(e) => setEditData({ ...editData, bank: e.target.value })}
+                    placeholder="ธนาคารที่ตรวจพบ"
+                    className="bg-white/5 border-white/10 text-white"
+                  />
+                </div>
+
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
                     <Label className="text-xs text-white/50">วันที่</Label>
