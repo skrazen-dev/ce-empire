@@ -43,12 +43,14 @@
       lastFocus = document.activeElement;
       modal.classList.add('open');
       modal.setAttribute('aria-hidden', 'false');
+      if (window.ceSound) window.ceSound.open();
       var u = $('username');
       if (u) setTimeout(function () { u.focus(); }, 50);
     }
     function close() {
       modal.classList.remove('open');
       modal.setAttribute('aria-hidden', 'true');
+      if (window.ceSound) window.ceSound.close();
       var err = $('loginError'); if (err) err.textContent = '';
       if (lastFocus && lastFocus.focus) lastFocus.focus();
     }
@@ -83,12 +85,15 @@
       if (submitBtn) submitBtn.disabled = true;
       try {
         if (await isAuthorized(username, password)) {
+          if (window.ceSound) window.ceSound.success();
           sessionStorage.setItem('ce_user', ALLOWED_USER);
           window.location.href = form.getAttribute('data-success-url') || 'dashboard.html';
           return;
         }
+        if (window.ceSound) window.ceSound.error();
         if (err) err.textContent = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
       } catch (e) {
+        if (window.ceSound) window.ceSound.error();
         if (err) err.textContent = 'ระบบเกิดข้อผิดพลาด โปรดลองใหม่อีกครั้ง';
       } finally {
         if (submitBtn) submitBtn.disabled = false;
