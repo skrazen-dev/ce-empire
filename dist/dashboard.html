@@ -36,26 +36,42 @@
   </main>
 
   <script>
-    // Query server for current user; if not authenticated, redirect to landing
+    // Auth guard:
+    //  - When served by the Express server, use the /api/me session.
+    //  - On pure-static hosting, fall back to the sessionStorage flag set at login.
     (function(){
+      function setUser(name){ document.getElementById('userName').textContent = name || 'BOSS'; }
+
+      function wireLogout(serverSession){
+        document.getElementById('logoutBtn').addEventListener('click', async function(ev){
+          ev.preventDefault();
+          try { if (serverSession) await fetch('/api/logout', { method: 'POST', credentials: 'include' }); }
+          catch (e) { /* ignore */ }
+          sessionStorage.removeItem('ce_user');
+          window.location.href = 'index.html';
+        });
+      }
+
       async function check() {
         try {
           const resp = await fetch('/api/me', { credentials: 'include' });
-          if (!resp.ok) {
-            window.location.href = 'index.html';
+          if (resp.ok) {
+            const data = await resp.json();
+            setUser(data.displayName || data.user);
+            wireLogout(true);
             return;
           }
-          const data = await resp.json();
-          document.getElementById('userName').textContent = data.displayName || data.user;
-          document.getElementById('logoutBtn').addEventListener('click', async function(ev){
-            ev.preventDefault();
-            await fetch('/api/logout', { method: 'POST', credentials: 'include' });
-            window.location.href = 'index.html';
-          });
         } catch (e) {
-          console.error('auth check failed', e);
-          window.location.href = 'index.html';
+          // No backend reachable — fall through to static check.
         }
+
+        // Static fallback: rely on the session flag set during login.
+        if (sessionStorage.getItem('ce_user')) {
+          setUser(sessionStorage.getItem('ce_user'));
+          wireLogout(false);
+          return;
+        }
+        window.location.href = 'index.html';
       }
       check();
     })();

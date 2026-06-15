@@ -1,42 +1,53 @@
-// Simple demo animation for Live Volume and Live Profit
-(function(){
-  function animateCounter(elOrSelector, from, to, ms){
-    const el = (typeof elOrSelector === 'string') ? document.querySelector(elOrSelector) : elOrSelector;
+/* =========================================================
+   CE EMPIRE — live counters
+   Animates Volume, Profit, and USDT figures for a "live" feel.
+   ========================================================= */
+(function () {
+  'use strict';
+
+  function animate(el, from, to, ms, decimals) {
     if (!el) return;
-    const start = performance.now();
-    function frame(t){
-      const p = Math.min(1, (t-start)/ms);
-      const val = Math.floor(from + (to-from)*p);
-      el.textContent = val.toLocaleString();
+    var start = performance.now();
+    function frame(t) {
+      var p = Math.min(1, (t - start) / ms);
+      var eased = 1 - Math.pow(1 - p, 3); // ease-out
+      var val = from + (to - from) * eased;
+      el.textContent = format(val, decimals);
       if (p < 1) requestAnimationFrame(frame);
     }
     requestAnimationFrame(frame);
   }
 
-  function randomDelta(base, pct){
-    const delta = Math.round(base * (Math.random()*pct));
-    return base + (Math.random() > .5 ? delta : -delta);
+  function format(n, decimals) {
+    return Number(n).toLocaleString('en-US', {
+      minimumFractionDigits: decimals || 0,
+      maximumFractionDigits: decimals || 0
+    });
   }
 
-  document.addEventListener('DOMContentLoaded', () =>{
-    const volEl = document.querySelector('#liveVolume .value');
-    const profitEl = document.querySelector('#liveProfit .value');
-    if (!volEl || !profitEl) return;
+  function jitter(base, pct) {
+    var delta = base * (Math.random() * pct);
+    return base + (Math.random() > 0.5 ? delta : -delta);
+  }
 
-    // initial values that match your spec sample
-    let vol = 12582450;
-    let profit = 185920;
-    volEl.textContent = vol.toLocaleString();
-    profitEl.textContent = profit.toLocaleString();
+  document.addEventListener('DOMContentLoaded', function () {
+    var volEl = document.getElementById('liveVolume');
+    var profitEl = document.getElementById('liveProfit');
+    var usdtEl = document.getElementById('liveUsdt');
 
-    // every few seconds animate to a nearby value for "live" feeling
-    setInterval(() =>{
-      const newVol = randomDelta(vol, 0.02);
-      animateCounter(volEl, vol, newVol, 1200);
-      vol = newVol;
-      const newProfit = randomDelta(profit, 0.04);
-      animateCounter(profitEl, profit, newProfit, 900);
-      profit = newProfit;
-    }, 4000);
+    var vol = 12582450, profit = 185920, usdt = 42590;
+
+    if (volEl) volEl.textContent = format(vol, 0);
+    if (profitEl) profitEl.textContent = format(profit, 0);
+    if (usdtEl) usdtEl.textContent = format(usdt, 2);
+
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) return;
+
+    setInterval(function () {
+      if (volEl) { var nv = jitter(vol, 0.015); animate(volEl, vol, nv, 1200, 0); vol = nv; }
+      if (profitEl) { var np = jitter(profit, 0.03); animate(profitEl, profit, np, 1000, 0); profit = np; }
+      if (usdtEl) { var nu = jitter(usdt, 0.02); animate(usdtEl, usdt, nu, 1100, 2); usdt = nu; }
+    }, 4500);
   });
 })();

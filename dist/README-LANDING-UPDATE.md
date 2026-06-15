@@ -1,41 +1,51 @@
-# CE Empire — Landing & Demo Command Center (Local patch)
+# CE Empire — Landing & Command Center (dist)
 
 ## สรุป
-- ไฟล์ชุดนี้เป็นตัวอย่าง landing page แบบ "luxury fintech / private banking command center" พร้อมระบบล็อกอิน client-side ที่ยอมรับเฉพาะ:
-  - Username: `BOSS`
-  - Password: `Qw114477`
-- Chime จะเล่นครั้งเดียวหลัง interaction แรก (pointerdown/click/touch)
-- วางไฟล์เหล่านี้ลงในโฟลเดอร์: `dist/`
+หน้า landing แบบ **luxury fintech / private banking command center** (matte black,
+graphite, chrome silver, gold accent) พร้อมระบบเข้าสู่ระบบผู้ใช้เดียว:
+
+- **Username:** `BOSS`
+- **Password:** `Qw114477`
+
+บัญชีอื่น ๆ ทั้งหมดถูกปฏิเสธ
 
 ## รายการไฟล์
-- `dist/index.html` — landing page (แทนหน้าเดิมชั่วคราว)
-- `dist/assets/css/landing.css` — สไตล์หน้า landing / dashboard แสดงตัวอย่าง
-- `dist/assets/js/chime.js` — เล่น chime ครั้งเดียวหลัง gesture แรก
-- `dist/assets/js/live-counters.js` — animate counters
-- `dist/assets/js/login.js` — ตรวจ credential (เฉพาะ BOSS)
-- `dist/dashboard.html` — หน้า command center ตัวอย่าง
-- `README-LANDING-UPDATE.md` — ไฟล์นี้
+- `dist/index.html` — landing / command center (top bar, สรุปการเงิน, hero โลโก้ CE,
+  profit chart, AI status, ทีมงานออนไลน์, ข่าวสาร, สถิติด้านล่าง, sign-in modal)
+- `dist/dashboard.html` — หน้า command center (มี auth guard)
+- `dist/assets/css/landing.css` — ธีม luxury + responsive + animation
+- `dist/assets/js/background.js` — financial particles / data streams, profit chart,
+  นาฬิกาไทย (พ.ศ.), ปุ่มโหมดกลางคืน
+- `dist/assets/js/live-counters.js` — animate ตัวเลข Volume / Profit / USDT
+- `dist/assets/js/chime.js` — premium wealth chime (เล่นครั้งเดียวหลัง gesture แรก)
+- `dist/assets/js/login.js` — ตรวจสอบ credential (ผู้ใช้เดียว BOSS)
 
-## การเตรียมไฟล์เสียง (สำคัญ)
-- วางไฟล์ chime ที่ชื่อ `premium-chime.mp3` ที่ path:
-  `dist/assets/sounds/premium-chime.mp3`
-- คุณสามารถใช้ไฟล์เสียง chime สั้น ๆ จาก resource ของคุณเอง หรือดาวน์โหลด audio เสียงชิมที่อนุญาตใช้
+## ระบบเข้าสู่ระบบ (2 ชั้น)
+`login.js` พยายามใช้ **server session** ก่อน แล้วจึง fallback ไป client-side:
 
-## วิธีทดสอบ (ขั้นตอนแนะนำ)
-1. รันเว็บเซิร์ฟเวอร์แบบง่าย (แนะนำ):
-   - Python 3: `cd dist` then `python -m http.server 8000`
-   - จากนั้นเปิดเบราเซอร์ที่ http://localhost:8000
-2. ทดสอบตาม Test Plan:
-   - หน้า landing ดูโทนสีและ layout (matte black, graphite, chrome silver, gold accent)
-   - คลิก `ENTER COMMAND CENTER` จะไปหน้า dashboard
-   - ตรวจ login box ด้านขวาล่าง — ใส่ BOSS/Qw114477 ต้องเข้าได้
-   - ทดสอบ username/password อื่น ๆ ต้องเข้าไม่ได้
-   - การคลิกหน้าแรกจะทำให้เสียง chime เล่นครั้งเดียว (ต้องวางไฟล์เสียงก่อน)
-   - ตรวจ mobile/desktop responsiveness
+1. **Server (source of truth)** — `POST /api/login` ตรวจรหัสผ่านที่ hash ด้วย bcrypt
+   ในฐานข้อมูล (ดู `server/src/auth.ts`, seed ผู้ใช้ BOSS ด้วย `server/src/seed-user.ts`).
+   ใช้เมื่อเสิร์ฟไซต์ผ่าน CE Empire Express server
+2. **Static fallback** — เมื่อไม่มี backend (โฮสต์ไฟล์ static) จะตรวจ username `BOSS`
+   และเทียบ **SHA-256** ของรหัสผ่านกับ digest ที่ฝังไว้ (ไม่มี plaintext password ใน repo)
 
-## คำเตือนด้านความปลอดภัย
-- โค้ดนี้เก็บรหัสผ่านใน client-side (JS) เพื่อวัตถุประสงค์การแสดงตัวอย่าง / local demo เท่านั้น — หากระบบจะใช้งานจริงบนอินเทอร์เน็ต ต้องย้ายการตรวจสอบไปรันที่ฝั่งเซิร์ฟเวอร์ (hash รหัสผ่าน เช่น bcrypt/argon2 และส่ง session cookie หรือ token)
-- อย่าเก็บรหัสผ่าน plaintext ใน repo สาธารณะ
+ทั้งสองชั้นยอมรับเฉพาะผู้ใช้ `BOSS` เท่านั้น
 
-## สถานะ commit
-สร้าง PR จาก branch `landing-ux-update` — ตรวจสอบไฟล์ และ approve เพื่อ merge ลงใน main
+## Chime
+สังเคราะห์เสียงด้วย Web Audio API (ไม่ต้องมีไฟล์เสียง) เล่นครั้งเดียวหลัง gesture แรก
+หากต้องการใช้ไฟล์ของคุณเอง ให้วางที่ `dist/assets/sounds/premium-chime.mp3`
+แล้วระบบจะใช้ไฟล์นั้นแทน
+
+## วิธีทดสอบ
+1. แบบ static: `cd dist && python3 -m http.server 8000` แล้วเปิด http://localhost:8000
+   - login ด้วย `BOSS` / `Qw114477` → เข้าได้ (ใช้ static fallback)
+2. แบบเต็มระบบ: รัน Express server (`server/src/index.ts`) ที่เสิร์ฟ `dist/` และมี
+   `/api/login`, seed ผู้ใช้ BOSS ก่อน
+3. ตรวจ Test Plan: ธีมสี, ปุ่ม ENTER COMMAND CENTER, login ถูก/ผิด, chime เล่นครั้งเดียว,
+   responsive desktop/mobile
+
+## ความปลอดภัย
+- ไม่มี plaintext password ใน repo (เก็บเป็น SHA-256 digest สำหรับ static fallback,
+  bcrypt hash ในฐานข้อมูลสำหรับ server)
+- สำหรับ production แนะนำให้ใช้ server-side auth (bcrypt/argon2 + httpOnly session cookie)
+  เป็นหลัก — client-side fallback มีไว้สำหรับ demo / static hosting เท่านั้น
