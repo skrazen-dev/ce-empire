@@ -3,23 +3,27 @@ import path from 'path'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
-import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import { playwright } from '@vitest/browser-playwright'
 
 // https://vite.dev/config/
 export default defineConfig({
+  root: 'client',
   plugins: [
-    tanstackRouter({
-      target: 'react',
-      autoCodeSplitting: true,
-    }),
     react(),
     tailwindcss(),
   ],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      '@': path.resolve(__dirname, './client/src'),
+      '@shared': path.resolve(__dirname, './shared'),
     },
+  },
+  build: {
+    // NOTE: repo `dist/` holds a separate prebuilt static landing that
+    // `vercel.json` deploys as outputDirectory, so the React app must build
+    // elsewhere to avoid clobbering it.
+    outDir: path.resolve(__dirname, './dist-app'),
+    emptyOutDir: true,
   },
   test: {
     silent: 'passed-only',

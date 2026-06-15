@@ -17,7 +17,8 @@
 
     /* Alias */
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./client/src/*"],
+      "@shared/*": ["./shared/*"]
     },
 
     /* Linting */
@@ -27,5 +28,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["src"]
+  "include": ["client/src", "shared", "server"]
 }
