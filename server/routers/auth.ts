@@ -51,11 +51,24 @@ export const authRouter = {
         password: z.string().min(1, "Password required"),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input, ctx }) => {
       const result = await loginUser(input.username, input.password);
-      
+
       if (!result.success) {
         throw new Error(result.error || "Login failed");
+      }
+
+      // Establish the session: authenticateRequest() reads the "auth_token"
+      // cookie (value = user id). Without setting it here, login succeeded but
+      // every subsequent protected call (me, tasks, ...) was unauthenticated.
+      if (ctx.res && result.userId != null) {
+        ctx.res.cookie("auth_token", String(result.userId), {
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "lax",
+          path: "/",
+          maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
+        });
       }
 
       return {
@@ -82,7 +95,11 @@ export const authRouter = {
   /**
    * Logout (server-side session cleanup)
    */
-  logout: protectedProcedure.mutation(async () => {
+  logout: protectedProcedure.mutation(async ({ ctx }) => {
+    // Clear the session cookie set at login.
+    if (ctx.res) {
+      ctx.res.clearCookie("auth_token", { path: "/" });
+    }
     return { success: true };
   }),
 
