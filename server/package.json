@@ -1,0 +1,23 @@
+{
+  "name": "ce-empire-server",
+  "version": "1.0.0",
+  "description": "Server for CE Empire demo — session-based auth + static serve",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts"
+  },
+  "dependencies": {
+    "bcrypt": "^5.1.0",
+    "connect-pg-simple": "^8.0.0",
+    "dotenv": "^16.0.0",
+    "express": "^4.18.2",
+    "express-session": "^1.17.3",
+    "pg": "^8.10.0"
+  },
+  "devDependencies": {
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.0.0"
+  }
+}

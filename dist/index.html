@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CE Empire — Command Center</title>
+  <meta name="description" content="CE Empire — ศูนย์บัญชาการการเงิน. Every transaction builds the empire." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Noto+Sans+Thai:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/landing.css" />
+</head>
+<body>
+  <noscript>
+    <div style="background:#111;color:#ffd;padding:12px;text-align:center">This experience requires JavaScript. Please enable it in your browser.</div>
+  </noscript>
+
+  <!-- Financial particles / data streams -->
+  <canvas id="backgroundCanvas" class="bg-canvas" aria-hidden="true"></canvas>
+
+  <div class="shell">
+
+    <!-- ============ TOP BAR ============ -->
+    <header class="top-bar">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48"><defs>
+            <linearGradient id="bm" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0%" stop-color="#f6e7b8"/><stop offset="60%" stop-color="#d4af37"/><stop offset="100%" stop-color="#b98f2a"/>
+            </linearGradient></defs>
+            <path d="M10 18 l6 6 4-10 4 10 4-10 4 10 6-6 -2 16 H12 z" fill="url(#bm)"/>
+            <text x="24" y="40" text-anchor="middle" font-family="Georgia,serif" font-size="11" font-weight="700" fill="#e8eaed">CE</text>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <div class="name">CE EMPIRE</div>
+          <div class="sub">Command Center</div>
+        </div>
+        <div class="status-pill" style="margin-left:14px">
+          <span class="pulse" aria-hidden="true"></span><span>ระบบทำงานปกติ</span>
+        </div>
+      </div>
+
+      <div class="top-right">
+        <div class="clock">
+          <span class="date" id="clockDate">—</span>
+          <span class="sep" aria-hidden="true"></span>
+          <span class="time" id="clockTime">--:--:--</span>
+        </div>
+        <button class="mode-toggle" type="button" id="modeToggle" aria-label="สลับโหมดกลางคืน">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+          <span>โหมดกลางคืน</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- ============ COMMAND GRID ============ -->
+    <main class="command-grid">
+
+      <!-- ---------- LEFT COLUMN ---------- -->
+      <section class="col-left" aria-label="สรุปการเงินวันนี้">
+        <article class="panel stat-card">
+          <div class="stat-top">
+            <span class="stat-label">
+              <svg class="stat-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 7-7"/><path d="M21 8v5h-5"/></svg>
+              มูลค่าการซื้อขายวันนี้
+            </span>
+            <span class="chip up" id="chipVolume">+18.72%</span>
+          </div>
+          <div class="stat-value">฿ <span id="liveVolume">12,582,450</span></div>
+          <div class="stat-sub">เทียบกับเมื่อวาน</div>
+        </article>
+
+        <article class="panel stat-card">
+          <div class="stat-top">
+            <span class="stat-label">
+              <svg class="stat-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l3-3 3 3 4-5"/></svg>
+              กำไรสุทธิวันนี้
+            </span>
+            <span class="chip up" id="chipProfit">+32.54%</span>
+          </div>
+          <div class="stat-value">฿ <span id="liveProfit">185,920</span></div>
+          <div class="stat-sub">เทียบกับเมื่อวาน</div>
+        </article>
+
+        <article class="panel stat-card">
+          <div class="stat-top">
+            <span class="stat-label">
+              <svg class="stat-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 9h4a2 2 0 0 1 0 4H9m0 0h5"/></svg>
+              ปริมาณ USDT วันนี้
+            </span>
+            <span class="chip up" id="chipUsdt">+21.31%</span>
+          </div>
+          <div class="stat-value"><span id="liveUsdt">42,590.00</span> <span class="unit">U</span></div>
+          <div class="stat-sub">เทียบกับเมื่อวาน</div>
+        </article>
+      </section>
+
+      <!-- ---------- CENTER HERO ---------- -->
+      <section class="panel hero" aria-label="CE Empire">
+        <svg class="crown" viewBox="0 0 64 40" aria-hidden="true">
+          <defs><linearGradient id="cg" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#f6e7b8"/><stop offset="100%" stop-color="#b98f2a"/></linearGradient></defs>
+          <path d="M6 34 L10 12 l10 10 L32 6 l12 16 10-10 4 22 z" fill="url(#cg)"/>
+          <circle cx="10" cy="11" r="3" fill="#f6e7b8"/><circle cx="32" cy="5" r="3.4" fill="#f6e7b8"/><circle cx="54" cy="11" r="3" fill="#f6e7b8"/>
+        </svg>
+
+        <svg class="hero-logo" viewBox="0 0 360 150" role="img" aria-label="CE EMPIRE">
+          <defs>
+            <linearGradient id="chrome" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="#ffffff"/><stop offset="45%" stop-color="#c9ccd1"/>
+              <stop offset="55%" stop-color="#8d9096"/><stop offset="100%" stop-color="#e9ebef"/>
+            </linearGradient>
+            <linearGradient id="goldT" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="#f6e7b8"/><stop offset="100%" stop-color="#b98f2a"/>
+            </linearGradient>
+            <filter id="ds" x="-20%" y="-20%" width="140%" height="160%">
+              <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000" flood-opacity="0.55"/>
+            </filter>
+          </defs>
+          <text class="ce" x="180" y="86" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-size="92" font-weight="800" fill="url(#chrome)" filter="url(#ds)">CE</text>
+          <text x="180" y="126" text-anchor="middle" font-family="Inter,sans-serif" font-size="26" letter-spacing="14" font-weight="700" fill="url(#goldT)">EMPIRE</text>
+        </svg>
+
+        <div class="divider-gold" aria-hidden="true"></div>
+        <h1 class="hero-th">ศูนย์บัญชาการการเงิน</h1>
+        <p class="hero-tagline">Every Transaction Builds The Empire</p>
+
+        <!-- profit chart -->
+        <div class="hero-chart">
+          <canvas id="profitChart" aria-hidden="true"></canvas>
+          <div class="chart-cap">
+            <div class="l"><div class="t gold">กำไรสุทธิ</div><div class="s">7 วันล่าสุด</div></div>
+            <div class="r"><div class="big">+32.54%</div><div class="s">เทียบกับ 7 วันที่แล้ว</div></div>
+          </div>
+        </div>
+
+        <a href="dashboard.html" class="cta" id="enterCta" role="button">
+          ENTER COMMAND CENTER
+          <span class="cta-sub">เข้าสู่ศูนย์บัญชาการ</span>
+        </a>
+
+        <div class="quote">
+          <div class="label">คำคมประจำวัน</div>
+          <div class="q">“ <span class="em">วินัย</span>สร้างเงิน &nbsp; <span class="em">ระบบ</span>สร้างอาณาจักร ”</div>
+          <div class="en">Discipline Creates Wealth</div>
+        </div>
+      </section>
+
+      <!-- ---------- RIGHT COLUMN ---------- -->
+      <section class="col-right" aria-label="สถานะระบบและทีมงาน">
+        <!-- AI status -->
+        <article class="panel">
+          <div class="panel-head">
+            <span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 9h6v6H9z"/></svg></span>
+            <h3>สถานะระบบ AI</h3>
+          </div>
+          <div class="ai-online">
+            <svg class="brain" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3a3 3 0 0 0-3 3 3 3 0 0 0-1 5 3 3 0 0 0 2 5 3 3 0 0 0 5 1V4a3 3 0 0 0-3-1zM15 3a3 3 0 0 1 3 3 3 3 0 0 1 1 5 3 3 0 0 1-2 5 3 3 0 0 1-5 1"/></svg>
+            AI SYSTEM ONLINE
+          </div>
+          <div class="kv"><span class="k"><span class="d" style="background:var(--gold)"></span>งานที่กำลังประมวลผล</span><span class="v" id="aiProcessing">23</span></div>
+          <div class="kv"><span class="k"><span class="d" style="background:var(--blue)"></span>การแจ้งเตือน</span><span class="v">3</span></div>
+          <div class="kv"><span class="k"><span class="d" style="background:var(--green)"></span>ปัญหาสำคัญ</span><span class="v">0</span></div>
+          <div class="panel-foot">อัปเดตล่าสุด <span id="aiUpdated">09:41:22</span></div>
+        </article>
+
+        <!-- Team online -->
+        <article class="panel">
+          <div class="panel-head">
+            <span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><path d="M3 20a6 6 0 0 1 12 0"/><circle cx="17" cy="9" r="2.4"/><path d="M15.5 20a5 5 0 0 1 6.5-4.5"/></svg></span>
+            <h3>ทีมงานออนไลน์</h3>
+          </div>
+          <div class="team">
+            <div class="donut">
+              <svg width="96" height="96" viewBox="0 0 96 96">
+                <circle cx="48" cy="48" r="40" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="10"/>
+                <!-- online 7/10 -->
+                <circle cx="48" cy="48" r="40" fill="none" stroke="#34d399" stroke-width="10" stroke-linecap="round"
+                        stroke-dasharray="251.2" stroke-dashoffset="75.4"/>
+                <!-- busy 2/10 -->
+                <circle cx="48" cy="48" r="40" fill="none" stroke="#d4af37" stroke-width="10" stroke-linecap="round"
+                        stroke-dasharray="251.2" stroke-dashoffset="201" transform="rotate(252 48 48)"/>
+              </svg>
+              <div class="center"><div class="num">10</div><div class="lab">ทั้งหมด</div></div>
+            </div>
+            <div class="legend">
+              <div class="row"><span class="name"><span class="dot" style="background:#34d399"></span>ออนไลน์</span><span class="v">7</span></div>
+              <div class="row"><span class="name"><span class="dot" style="background:#d4af37"></span>ไม่ว่าง</span><span class="v">2</span></div>
+              <div class="row"><span class="name"><span class="dot" style="background:#6b7076"></span>ออฟไลน์</span><span class="v">1</span></div>
+            </div>
+          </div>
+        </article>
+
+        <!-- News / alerts -->
+        <article class="panel news">
+          <div class="panel-head">
+            <span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 8 3 8H3s3-1 3-8z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></span>
+            <h3>ข่าวสาร &amp; การแจ้งเตือน</h3>
+          </div>
+          <div class="item"><span class="dot" style="background:var(--gold)"></span><span class="body">SCB — วงเงินใกล้เต็ม 85%</span><span class="ago">2 นาทีที่แล้ว</span></div>
+          <div class="item"><span class="dot" style="background:var(--blue)"></span><span class="body">รายการรอการตรวจสอบ 7 รายการ</span><span class="ago">5 นาทีที่แล้ว</span></div>
+          <div class="item"><span class="dot" style="background:var(--green)"></span><span class="body">ได้กำไรวันนี้สูงกว่าเป้าหมาย 32%</span><span class="ago">15 นาทีที่แล้ว</span></div>
+          <div class="see-all">ดูทั้งหมด →</div>
+        </article>
+      </section>
+    </main>
+
+    <!-- ============ BOTTOM STATS BAR ============ -->
+    <section class="stats-bar" aria-label="สรุปสถิติ">
+      <div class="cell"><div class="lab">อัตรากำไรเฉลี่ย</div><div class="val green">1.48<span class="u">%</span></div></div>
+      <div class="cell"><div class="lab">จำนวนรายการวันนี้</div><div class="val">126<span class="u">รายการ</span></div></div>
+      <div class="cell"><div class="lab">ธนาคารที่ใช้งาน</div><div class="val">8<span class="u">บัญชี</span></div></div>
+      <div class="cell"><div class="lab">งานค้างอยู่</div><div class="val">18<span class="u">รายการ</span></div></div>
+      <div class="cell"><div class="lab">สลิปที่รอตรวจสอบ</div><div class="val">7<span class="u">รายการ</span></div></div>
+    </section>
+
+    <!-- ============ FOOTER ============ -->
+    <footer class="site-footer">
+      <div>© CE Empire 2024 · All Rights Reserved</div>
+      <div class="enc">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+        ข้อมูลทั้งหมดเข้ารหัสระดับสูง
+      </div>
+      <div class="legacy"><div class="l1">Build an Empire.</div><div>Leave a Legacy.</div></div>
+    </footer>
+  </div>
+
+  <!-- ============ SIGN-IN MODAL ============ -->
+  <div class="modal" id="loginModal" role="dialog" aria-modal="true" aria-labelledby="signinTitle" aria-hidden="true">
+    <div class="signin">
+      <button class="x" type="button" id="loginClose" aria-label="ปิด">✕</button>
+      <div class="lock" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+      </div>
+      <h2 id="signinTitle">เข้าสู่ศูนย์บัญชาการ</h2>
+      <p class="lead">Authorized personnel only</p>
+      <form id="loginForm" data-success-url="dashboard.html" autocomplete="off">
+        <label class="field"><span>Username</span>
+          <input id="username" name="username" type="text" autocomplete="off" required autocapitalize="none" spellcheck="false" />
+        </label>
+        <label class="field"><span>Password</span>
+          <input id="password" name="password" type="password" autocomplete="new-password" required />
+        </label>
+        <div id="loginError" class="login-error" aria-live="polite"></div>
+        <button type="submit" class="btn" id="loginSubmit">เข้าสู่ระบบ</button>
+      </form>
+      <p class="note">เฉพาะผู้ใช้ที่ได้รับสิทธิ์เท่านั้น</p>
+    </div>
+  </div>
+
+  <!-- Scripts: chime first (gesture listener), then visuals, then auth -->
+  <script src="assets/js/chime.js" defer></script>
+  <script src="assets/js/background.js" defer></script>
+  <script src="assets/js/live-counters.js" defer></script>
+  <script src="assets/js/login.js" defer></script>
+</body>
+</html>
