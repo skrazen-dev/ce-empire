@@ -36,20 +36,28 @@
   </main>
 
   <script>
-    // simple guard: only proceed if session contains ce_user = BOSS
+    // Query server for current user; if not authenticated, redirect to landing
     (function(){
-      const user = sessionStorage.getItem('ce_user');
-      if (!user || user !== 'BOSS') {
-        // no permission -> back to landing
-        window.location.href = 'index.html';
-        return;
+      async function check() {
+        try {
+          const resp = await fetch('/api/me', { credentials: 'include' });
+          if (!resp.ok) {
+            window.location.href = 'index.html';
+            return;
+          }
+          const data = await resp.json();
+          document.getElementById('userName').textContent = data.displayName || data.user;
+          document.getElementById('logoutBtn').addEventListener('click', async function(ev){
+            ev.preventDefault();
+            await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+            window.location.href = 'index.html';
+          });
+        } catch (e) {
+          console.error('auth check failed', e);
+          window.location.href = 'index.html';
+        }
       }
-      document.getElementById('userName').textContent = user;
-      document.getElementById('logoutBtn').addEventListener('click', function(ev){
-        ev.preventDefault();
-        sessionStorage.removeItem('ce_user');
-        window.location.href = 'index.html';
-      });
+      check();
     })();
   </script>
 </body>
