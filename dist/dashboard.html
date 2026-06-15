@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CE Empire — Command Center (Dashboard)</title>
+  <link rel="stylesheet" href="assets/css/landing.css" />
+  <style>
+    .dashboard {padding:28px;max-width:1200px;margin:0 auto;color:var(--muted)}
+    .topbar{display:flex;justify-content:space-between;align-items:center}
+    .card{background:linear-gradient(180deg,rgba(255,255,255,0.02), rgba(0,0,0,0.12));border:1px solid rgba(255,255,255,0.02);padding:18px;border-radius:10px;margin-top:18px}
+    .logout{background:#222;color:#fff;padding:8px 10px;border-radius:8px;text-decoration:none}
+  </style>
+</head>
+<body>
+  <main class="dashboard" id="dashboardMain">
+    <div class="topbar">
+      <div>
+        <h1 style="color:var(--gold)">CE EMPIRE — COMMAND CENTER</h1>
+        <div style="color:rgba(255,255,255,0.72)">Welcome, <span id="userName">—</span></div>
+      </div>
+      <div>
+        <a id="logoutBtn" class="logout" href="#">Log out</a>
+      </div>
+    </div>
+
+    <section class="card">
+      <h2>Overview</h2>
+      <p>นี่คือหน้าจอจำลอง command center — ให้ redirect กลับไปหน้าเดิมของระบบจริงตาม flow ของคุณ</p>
+      <ul>
+        <li>Live Volume / Live Profit — แสดง animation</li>
+        <li>AI System Status — แสดงเป็น Online</li>
+        <li>Team Online — ตัวอย่าง</li>
+      </ul>
+    </section>
+  </main>
+
+  <script>
+    // simple guard: only proceed if session contains ce_user = BOSS
+    (function(){
+      const user = sessionStorage.getItem('ce_user');
+      if (!user || user !== 'BOSS') {
+        // no permission -> back to landing
+        window.location.href = 'index.html';
+        return;
+      }
+      document.getElementById('userName').textContent = user;
+      document.getElementById('logoutBtn').addEventListener('click', function(ev){
+        ev.preventDefault();
+        sessionStorage.removeItem('ce_user');
+        window.location.href = 'index.html';
+      });
+    })();
+  </script>
+</body>
+</html>

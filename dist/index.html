@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>CE Empire — Command Center</title>
+  <link rel="stylesheet" href="assets/css/landing.css" />
+</head>
+<body>
+  <main id="hero" class="luxury-hero">
+    <div class="hero-inner">
+      <!-- Inline simple chrome/gold logo -->
+      <div class="logo-wrap">
+        <svg class="ce-logo" viewBox="0 0 200 80" width="320" height="130" aria-hidden="true">
+          <defs>
+            <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+              <stop offset="0%" stop-color="#f6e7b8"/>
+              <stop offset="60%" stop-color="#d4af37"/>
+              <stop offset="100%" stop-color="#b98f2a"/>
+            </linearGradient>
+            <filter id="shadow" x="-50%" y="-50%" width="200%" height="200%">
+              <feDropShadow dx="0" dy="8" stdDeviation="18" flood-color="#000" flood-opacity="0.5"/>
+            </filter>
+          </defs>
+          <g filter="url(#shadow)">
+            <text x="50%" y="48%" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="48" fill="url(#g)" font-weight="700">CE</text>
+            <text x="50%" y="78%" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" fill="#cfcfcf">EMPIRE</text>
+          </g>
+        </svg>
+      </div>
+
+      <h1 class="hero-title">ศูนย์บัญชาการการเงิน</h1>
+      <p class="hero-tagline">EVERY TRANSACTION BUILDS THE EMPIRE</p>
+
+      <div class="hero-widgets">
+        <div class="counter" id="liveVolume"><div class="value">12,582,450</div><small>Live Volume</small></div>
+        <div class="counter" id="liveProfit"><div class="value">185,920</div><small>Live Profit</small></div>
+        <div class="counter" id="aiStatus"><div class="dot online"></div><small>AI SYSTEM ONLINE</small></div>
+      </div>
+
+      <a id="enterCta" class="cta" href="dashboard.html">ENTER COMMAND CENTER</a>
+
+      <div id="loginBox" class="login-box" aria-hidden="false">
+        <form id="loginForm" data-success-url="dashboard.html" class="login-form" autocomplete="off">
+          <h2>Sign In</h2>
+          <label>
+            <span>Username</span>
+            <input id="username" name="username" type="text" autocomplete="off" required />
+          </label>
+          <label>
+            <span>Password</span>
+            <input id="password" name="password" type="password" autocomplete="new-password" required />
+          </label>
+          <div id="loginError" class="login-error" aria-live="polite"></div>
+          <button type="submit" class="btn">Log In</button>
+        </form>
+        <p class="note">เฉพาะผู้ใช้ที่ได้รับสิทธิ์เท่านั้น</p>
+      </div>
+    </div>
+
+    <canvas id="backgroundCanvas" class="bg-canvas" aria-hidden="true"></canvas>
+  </main>
+
+  <!-- Scripts: chime first to attach gesture listener, then counters, then login handling -->
+  <script src="assets/js/chime.js" defer></script>
+  <script src="assets/js/live-counters.js" defer></script>
+  <script src="assets/js/login.js" defer></script>
+</body>
+</html>

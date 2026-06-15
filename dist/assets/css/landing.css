@@ -1,0 +1,36 @@
+:root{
+  --bg:#0b0b0b;
+  --panel:#141416;
+  --muted:#cfcfcf;
+  --gold:#d4af37;
+  --chrome:#cfcfcf;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;background:var(--bg);font-family:Inter, "Noto Sans", sans-serif;color:var(--muted)}
+.luxury-hero{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:48px;position:relative;overflow:hidden}
+.hero-inner{position:relative;z-index:2;max-width:1100px;width:100%;text-align:center;padding:36px}
+.logo-wrap{display:flex;justify-content:center}
+.ce-logo{width:260px;height:auto;filter:drop-shadow(0 14px 26px rgba(0,0,0,0.6));transform-origin:center;animation:logoEntrance 900ms cubic-bezier(.2,.9,.2,1)}
+@keyframes logoEntrance{from{transform:scale(.7) translateY(-6px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+.hero-title{font-size:30px;color:var(--gold);margin:12px 0 8px;letter-spacing:1px}
+.hero-tagline{font-size:13px;color:var(--chrome);opacity:.9;margin-bottom:22px;letter-spacing:2px;text-transform:uppercase}
+.hero-widgets{display:flex;gap:18px;justify-content:center;margin-bottom:26px;flex-wrap:wrap}
+.counter{background:linear-gradient(180deg,rgba(255,255,255,0.02), rgba(0,0,0,0.12));border:1px solid rgba(212,175,55,0.08);padding:12px 18px;border-radius:10px;min-width:160px}
+.counter .value{font-size:20px;font-weight:700;color:#fff}
+.counter small{font-size:11px;color:rgba(255,255,255,0.62)}
+.dot{width:12px;height:12px;border-radius:50%;display:inline-block;vertical-align:middle;margin-right:8px;background:#444}
+.dot.online{background:#2ecc71;box-shadow:0 0 6px rgba(46,204,113,0.18)}
+.cta{display:inline-block;margin-top:6px;padding:14px 36px;border-radius:12px;background:linear-gradient(90deg,rgba(212,175,55,0.18),rgba(212,175,55,0.06));border:1px solid rgba(212,175,55,0.6);color:#fff;text-decoration:none;font-weight:700;box-shadow:0 10px 40px rgba(0,0,0,0.6)}
+.bg-canvas{position:absolute;inset:0;z-index:1;opacity:.9}
+/* Login box overlay (compact) */
+.login-box{position:fixed;right:28px;bottom:28px;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(0,0,0,0.14));border:1px solid rgba(255,255,255,0.03);padding:14px;border-radius:12px;backdrop-filter: blur(6px);width:260px}
+.login-form h2{margin:0 0 8px;font-size:16px;color:var(--gold)}
+.login-form label{display:block;margin:8px 0;font-size:12px;text-align:left;color:#cfcfcf}
+.login-form input{width:100%;padding:8px 10px;border-radius:6px;border:1px solid rgba(255,255,255,0.04);background:#0e0e0f;color:#fff}
+.btn{display:inline-block;margin-top:8px;padding:10px 12px;border-radius:8px;background:var(--gold);color:#0b0b0b;border:none;width:100%;font-weight:700;cursor:pointer}
+.login-error{color:#ff6b6b;font-size:12px;min-height:16px;margin-top:6px}
+.note{font-size:11px;color:rgba(255,255,255,0.45);margin-top:6px;text-align:center}
+@media (max-width:600px){
+  .hero-inner{padding:20px}
+  .login-box{position:static;margin-top:18px;width:auto;border-radius:10px}
+}
