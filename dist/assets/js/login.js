@@ -1,60 +1,55 @@
-// Demo-only client-side login handler. NOTE: this file intentionally does NOT contain any plaintext passwords.
-// For local demo purposes this accepts username 'BOSS' and any non-empty password, but
-// this is not secure and must NOT be used in production. Move auth to the server for real use.
+// Client-side login handler adapted to use server-side authentication.
+// Sends credentials to POST /api/login and relies on an httpOnly session cookie set by the server.
+// This file no longer validates credentials in the client — it defers to the server.
 
 (function(){
-  const ALLOWED_USER = 'BOSS';
+  const formSelector = '#loginForm';
+  const ALLOWED_USER = 'BOSS'; // still used for UX guidance only
 
-  // Basic brute-force guard for demo: allow 5 attempts then disable for 15s
-  let attempts = 0;
-  const MAX_ATTEMPTS = 5;
-  const LOCKOUT_MS = 15000;
-  let lockedUntil = 0;
-
-  try {
-    // expose demo user info (no password) for integrations/tests if present
-    if (window.demoUsers) window.demoUsers = [{username:ALLOWED_USER}];
-    if (window.defaultUsers) window.defaultUsers = [{username:ALLOWED_USER}];
-  } catch(e){ /* ignore */ }
-
-  function validateCredentials(u,p){
-    // lockedOut check
-    if (Date.now() < lockedUntil) return false;
-    // Demo mode: only verify the username matches the demo account and that
-    // a non-empty password was provided. DO NOT keep any real passwords here.
-    return String(u).trim() === ALLOWED_USER && String(p).trim().length > 0;
-  }
-
-  document.addEventListener('DOMContentLoaded', () =>{
-    const form = document.getElementById('loginForm');
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.querySelector(formSelector);
     if (!form) return;
+    const err = document.getElementById('loginError');
 
-    form.addEventListener('submit', (ev)=>{
+    form.addEventListener('submit', async (ev) => {
       ev.preventDefault();
-      const u = (document.getElementById('username')||{}).value || '';
-      const p = (document.getElementById('password')||{}).value || '';
-      const err = document.getElementById('loginError');
+      if (err) err.textContent = '';
 
-      if (Date.now() < lockedUntil) {
-        if (err) err.textContent = 'Too many attempts. Please wait a moment and try again.';
+      const u = (document.getElementById('username') || {}).value || '';
+      const p = (document.getElementById('password') || {}).value || '';
+
+      // Basic client-side checks to avoid empty submissions
+      if (!u || !p) {
+        if (err) err.textContent = 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน';
         return;
       }
 
-      if (validateCredentials(u,p)){
-        // set session flag (do NOT store password)
-        sessionStorage.setItem('ce_user', ALLOWED_USER);
-        // redirect to dashboard (use data-success-url if present)
-        const redirect = form.getAttribute('data-success-url') || 'dashboard.html';
-        window.location.href = redirect;
-      } else {
-        attempts += 1;
-        if (attempts >= MAX_ATTEMPTS) {
-          lockedUntil = Date.now() + LOCKOUT_MS;
-          if (err) err.textContent = 'Too many attempts. Please wait a moment and try again.';
-          attempts = 0; // reset after lockout
+      try {
+        const resp = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include', // include httpOnly cookie
+          body: JSON.stringify({ username: u, password: p })
+        });
+
+        if (resp.ok) {
+          // login success — server sets cookie; redirect to dashboard
+          const data = await resp.json();
+          // optional: store a safe display name in sessionStorage
+          if (data && data.user) sessionStorage.setItem('ce_user', data.user);
+          const redirect = form.getAttribute('data-success-url') || 'dashboard.html';
+          window.location.href = redirect;
+        } else if (resp.status === 401) {
+          if (err) err.textContent = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
+        } else if (resp.status === 429) {
+          if (err) err.textContent = 'Too many attempts. Please wait and try again.';
         } else {
-          if (err) err.textContent = 'Invalid username or password (demo mode: use username BOSS and any non-empty password).';
+          if (err) err.textContent = 'ระบบเกิดข้อผิดพลาด โปรดลองใหม่ภายหลัง';
+          console.warn('Login error', resp.status, await resp.text());
         }
+      } catch (e) {
+        console.error('Login request failed', e);
+        if (err) err.textContent = 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้';
       }
     });
   });
